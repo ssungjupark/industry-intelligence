@@ -1,2 +1,10 @@
-# industry-intelligence
-Industry Intelligence official-document research platform
+# Industry Intelligence
+
+Independent Next.js read-only deployment.
+12 industries, 30 companies, 242 official document links, 58 parsed originals.
+
+No Sites proxy, Supabase or AI credentials, admin/API/upload routes, or synthetic claims/signals.
+
+Node 22. Build and start commands are recorded in DEPLOYMENT.json. Use a private GitHub repository and the confirmed Render workspace.
+
+This version contains the current official acquisition batch. Refresh the original project and rerun scripts/prepare-render.mjs before publishing an update.

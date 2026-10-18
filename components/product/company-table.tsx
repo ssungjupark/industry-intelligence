@@ -1,0 +1,16 @@
+"use client";
+import Link from "@/lib/site-link";
+import { useState } from "react";
+import type { CompanySummary } from "@/lib/product-data";
+import { sourceLink } from "@/lib/source-link";
+import { EvidenceDrawer } from "./evidence-drawer";
+import {acquisitionLabel} from '@/lib/catalog-coverage';
+import {displayDocumentTitle} from "@/lib/document-relevance";
+import { updated } from "./format";
+export function CompanyTable({companies}:{companies:CompanySummary[]}) {
+ const [q,setQ]=useState("");const [all,setAll]=useState(true);const [page,setPage]=useState(0);
+ const available=companies.filter(c=>all||c.recent||c.metric||c.catalyst||c.latest);const filtered=available.filter(c=>`${c.name} ${c.ticker||""}`.toLowerCase().includes(q.toLowerCase()));const rows=filtered.slice(page*20,page*20+20);
+ const hasChanges=filtered.some(c=>c.recent);
+ const hasMetric=filtered.some(c=>c.metric);const hasCatalyst=filtered.some(c=>c.catalyst);
+ return <section className="product-section"><div className="section-title"><h2>주요 기업 <span className="section-count">{companies.length}</span></h2><div className="table-controls"><input aria-label="Search companies in industry" placeholder="Company / ticker" value={q} onChange={e=>{setQ(e.target.value);setPage(0);}}/><label><input type="checkbox" checked={all} onChange={e=>{setAll(e.target.checked);setPage(0);}}/>All companies</label></div></div><div className="product-table-scroll"><table className="product-table"><thead><tr><th>Company</th><th>{hasChanges?"Recent change":"Latest official document"}</th>{hasMetric&&<th>Key metric</th>}{hasCatalyst&&<th>Next catalyst</th>}<th>Updated</th></tr></thead><tbody>{rows.map(c=><tr key={c.id}><td data-label="Company"><Link className="company-name" href={`/companies/${encodeURIComponent(c.slug)}`}>{c.name}</Link><small>{c.ticker}</small></td><td data-label="Recent change">{c.recent?<EvidenceDrawer id={c.recent.id}>{c.recent.title}</EvidenceDrawer>:c.latest&&sourceLink(c.latest.url)?<><Link href={`/documents/${c.latest.id}`}>{displayDocumentTitle(c.latest.title)} →</Link><small>{acquisitionLabel(c.latest)}</small></>:<Link className="muted" href={`/companies/${encodeURIComponent(c.slug)}`}>회사 자료 보기 ↗</Link>}</td>{hasMetric&&<td data-label="Key metric">{c.metric?<EvidenceDrawer kind="metric" id={c.metric.id}><b>{c.metric.value_text} {c.metric.unit}</b><small>{c.metric.name}{c.metric.period?` · ${c.metric.period}`:""}</small></EvidenceDrawer>:"—"}</td>}{hasCatalyst&&<td data-label="Next catalyst">{c.catalyst?<EvidenceDrawer kind="event" id={c.catalyst.id}><b>{c.catalyst.title}</b><small>{c.catalyst.event_date?.slice(0,10)}</small></EvidenceDrawer>:"—"}</td>}<td data-label="Updated" className="muted">{updated(c.updated)||"—"}</td></tr>)}</tbody></table></div>{!rows.length&&<p className="empty-state">{q?"검색 결과가 없습니다.":"새 자료를 기다리고 있습니다."}</p>}{filtered.length>20&&<div className="pagination"><button disabled={!page} onClick={()=>setPage(page-1)}>이전</button><span>{page+1} / {Math.ceil(filtered.length/20)}</span><button disabled={(page+1)*20>=filtered.length} onClick={()=>setPage(page+1)}>다음</button></div>}</section>;
+}
