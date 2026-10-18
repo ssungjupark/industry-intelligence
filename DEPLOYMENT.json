@@ -3,6 +3,6 @@
   "plan": "free",
   "buildCommand": "corepack enable && pnpm install --frozen-lockfile && pnpm build",
   "startCommand": "pnpm start --hostname 0.0.0.0 --port $PORT",
-  "repository": null,
+  "repository": "https://github.com/ssungjupark/industry-intelligence",
   "workspaceId": "tea-db10b9vavr4c739lgfl0"
 }
