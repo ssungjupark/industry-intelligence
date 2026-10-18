@@ -1,7 +1,7 @@
 # Industry Intelligence
 
 Independent Next.js read-only deployment.
-12 industries, 30 companies, 347 official document links, 110 parsed originals.
+12 industries, 72 companies, 717 official document links, 226 parsed originals.
 
 No Sites proxy, Supabase or AI credentials, admin/API/upload routes, or synthetic claims/signals.
 
