@@ -34,7 +34,7 @@ export function SourceDocuments({documents,companies,briefs=[],initialQuery=''}:
    <label className="readable-filter"><input type="checkbox" checked={readable} onChange={e=>{setReadable(e.target.checked);setLimit(8);}}/>원문 확보만</label>
    <button type="button" className="filter-reset" onClick={clear}>초기화</button>
   </div>
-  <p className="filter-result" role="status">{filtered.length}건{(from||to)&&' · 발표일이 확인된 자료 기준'}</p>
+  <p className="filter-result" role="status">{filtered.length}건{(from||to)&&' · 발표일 확인 자료 · 한국시간 기준'}</p>
   <div className="source-document-feed">{filtered.slice(0,limit).map(d=>{
    const company=companies.find(c=>c.id===d.entity_id),brief=briefs.find(b=>b.documentId===d.id);
    return <article key={d.id}><div className="source-document-meta">{company&&<Link href={`/companies/${company.slug}`}>{company.name}</Link>}<span>{documentTypeLabel(d.document_type)}</span><span>{new URL(d.url!).hostname}</span><span className="source-stage">{acquisitionLabel(d)}</span>{d.published_at?<time dateTime={d.published_at}>{updated(d.published_at)}</time>:<span>발표일 미확인</span>}</div>
