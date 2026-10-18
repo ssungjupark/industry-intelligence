@@ -24,3 +24,14 @@
 @media(min-width:1500px){.reader-has-toc .reader-body{max-width:76ch}}
 @media(max-width:1050px){.reader-has-toc{grid-template-columns:minmax(0,1fr);gap:24px}.reader-toc{border-bottom:1px solid var(--line);padding-bottom:18px}.reader-toc details{position:static;max-height:200px}.reader-toc nav{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 22px}.reader-toc-child{padding-left:0}}
 @media(max-width:600px){.reader-toolbar{padding:12px 15px;gap:8px;align-items:start}.reader-tools{gap:10px;flex-wrap:wrap;justify-content:flex-end}.reader-layout{padding:25px 20px 40px;gap:24px}.reader-toc nav{grid-template-columns:1fr}.reader-toc details{max-height:150px}.reader-body{line-height:1.85}.reader-body h2{font-size:1.2em}.reader-table-scroll th,.reader-table-scroll td{padding:9px}.document-heading h1{font-size:24px}.reader-extracted-lines{padding:12px}}
+/* Grounded Korean briefs precede the source reader. */
+.document-brief-summary{max-width:1060px;padding:28px 32px;background:#fff;border:1px solid #dce2e8;border-left:3px solid #315a80;margin:0 0 28px}
+.document-brief-summary>small{color:#627386;font-size:12px}
+.document-brief-summary .document-summary{max-width:76ch;font-size:18px;line-height:1.9;margin:12px 0 0}
+.document-reading>.product-section{max-width:1060px}
+.document-evidence,.document-original{max-width:1120px;margin:24px 0;border-top:1px solid #dce2e8;padding-top:20px}
+.document-evidence>summary,.document-original>summary{font-weight:650;padding:8px 0;cursor:pointer}
+.document-evidence>summary span{font-size:12px;color:#627386;margin-left:8px}
+.brief-metrics td{vertical-align:top;white-space:normal}
+.brief-metrics td:nth-child(2){font-variant-numeric:tabular-nums;min-width:125px}
+@media(max-width:600px){.document-brief-summary{padding:20px}.document-brief-summary .document-summary{font-size:16px}}
