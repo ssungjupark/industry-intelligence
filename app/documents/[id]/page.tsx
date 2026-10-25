@@ -1,12 +1,16 @@
 import Link from "@/lib/site-link";
 import {notFound} from "next/navigation";
 import {documentDetail} from "@/lib/document-detail";
-import {productCatalog} from "@/lib/product-data";
+import {productCatalog,readRows} from "@/lib/product-data";
 import {isUuid} from "@/lib/api-validation";
 import {sourceLink} from "@/lib/source-link";
 import {DocumentReading} from "@/components/product/document-reading";
 import {updated} from "@/components/product/format";
-export const dynamic="force-dynamic";
+export const revalidate=3600;
+export async function generateStaticParams(){
+ const documents=await readRows<{id:string}>("documents",{},undefined,undefined,"id");
+ return documents.map(({id})=>({id}));
+}
 export default async function DocumentPage({params}:{params:Promise<{id:string}>}){
  const {id}=await params;if(!isUuid(id))notFound();
  const data=await documentDetail(id);if(!data)notFound();
