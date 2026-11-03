@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test:collector": "node --test automation/*.test.mjs"
   },
   "packageManager": "pnpm@11.25.0",
   "engines": {
@@ -19,6 +20,8 @@
     "typescript": "6.0.3",
     "@types/node": "26.6.5",
     "@types/react": "19.3.0",
-    "@types/react-dom": "19.3.0"
+    "@types/react-dom": "19.3.0",
+    "cheerio": "1.2.0",
+    "unpdf": "1.8.1"
   }
 }

@@ -1,0 +1,43 @@
+name: Refresh official documents
+
+on:
+  schedule:
+    - cron: '17 1 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-official-main
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: corepack enable
+      - run: corepack pnpm install --frozen-lockfile
+      - run: corepack pnpm test:collector
+      - name: Discover and download official sources
+        run: node automation/refresh-official.mjs --batch=12 --max-new=12
+      - name: Publish changes only when documents changed
+        shell: bash
+        run: |
+          git add -- data/official-catalog.json data/reading-content.json
+          if git diff --cached --quiet; then
+            echo 'No new official documents; no deployment needed.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'data: refresh verified official documents'
+          git push origin HEAD:main
