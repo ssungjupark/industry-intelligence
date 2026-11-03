@@ -50,10 +50,33 @@ function paragraphs(text:string):ReadingBlock[]{
  }
  return result;
 }
+function pdfParagraphs(text:string):ReadingBlock[]{
+ const result:ReadingBlock[]=[];let prose:string[]=[];let bullet='';let bullets:ReadingBlock[][]=[];
+ const flushProse=()=>{if(prose.length){result.push(...paragraphs(prose.join('\n')));prose=[];}};
+ const flushBullet=()=>{if(bullet){bullets.push([{type:'paragraph',content:[{text:bullet.trim()}]}]);bullet='';}};
+ const flushList=()=>{flushBullet();if(bullets.length){result.push({type:'list',ordered:false,items:bullets});bullets=[];}};
+ for(const rawLine of text.replace(/\r\n/g,'\n').split('\n')){
+  const line=rawLine.trim();
+  if(!line){flushList();flushProse();continue;}
+  if(/^[•●▪]\s+/.test(line)){
+   flushProse();flushBullet();bullet=line.replace(/^[•●▪]\s+/,'');continue;
+  }
+  if(bullet){
+   // A new dateline or normal paragraph after a finished bullet starts the body.
+   if(/[.!?]$/.test(bullet)&&/^[A-Z][A-Z\s]+,\s+[A-Z][a-z]+ \d{1,2}, \d{4}\s*[-–]/.test(line)){flushList();prose.push(line);}
+   else bullet+=` ${line}`;
+   continue;
+  }
+  if(prose.length&&(/^(?:For release:|Refer to:)/i.test(line)||/^[A-Z][a-z]+ \d{1,2}, \d{4}$/.test(line))){flushProse();}
+  prose.push(line);
+  if(/[.!?]$/.test(line)&&prose.join(' ').length>110)flushProse();
+ }
+ flushList();flushProse();return result;
+}
 export function readingFromPlainText(raw:string):ReadingContent{
  const blocks:ReadingBlock[]=[];const parts=raw.split(/\[\[PAGE (\d+)\]\]/);
  if(parts.length===1)return {version:1,format:'text',blocks:paragraphs(raw)};
- blocks.push(...paragraphs(parts[0]));
- for(let i=1;i<parts.length;i+=2){blocks.push({type:'page',page:Number(parts[i])},...paragraphs(parts[i+1]||''));}
+ blocks.push(...pdfParagraphs(parts[0]));
+ for(let i=1;i<parts.length;i+=2){blocks.push({type:'page',page:Number(parts[i])},...pdfParagraphs(parts[i+1]||''));}
  return {version:1,format:'pdf',blocks};
 }
