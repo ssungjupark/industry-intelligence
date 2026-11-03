@@ -11,6 +11,6 @@ export function IndustryOverview({data}:{data:ProductData}) {
   <PublicationTimeline documents={data.documents} companies={data.companies}/>
   <CompanyTable companies={data.members}/>
   <CatalystAgenda companies={data.members}/>
-  <SourceDocuments documents={data.documents} companies={data.companies} briefs={data.briefs}/>
+  <SourceDocuments context="industry" documents={data.documents} companies={data.companies} briefs={data.briefs}/>
  </>;
 }

@@ -11,23 +11,30 @@ import {browseDocuments,documentTypeLabel} from '@/lib/document-browse';
 import {EvidenceDrawer} from './evidence-drawer';
 import {updated} from './format';
 
-export function SourceDocuments({documents,companies,briefs=[],initialQuery=''}:{documents:ProductDocument[];companies:Company[];briefs?:DocumentBrief[];initialQuery?:string}){
- const [query,setQuery]=useState(initialQuery),[limit,setLimit]=useState(8),[scope,setScope]=useState('relevant');
- const [company,setCompany]=useState(''),[type,setType]=useState(''),[from,setFrom]=useState(''),[to,setTo]=useState(''),[readable,setReadable]=useState(false);
+export function SourceDocuments({documents,companies,briefs=[],initialQuery='',context='company'}:{documents:ProductDocument[];companies:Company[];briefs?:DocumentBrief[];initialQuery?:string;context?:'industry'|'company'}){
  const sources=browseDocuments(documents,companies);
- const classified=sources.some(d=>d.metadata?.industryRelevance);
+ const classified=context==='industry'&&sources.some(d=>d.metadata?.industryRelevance);
  const relevant=sources.filter(d=>relevanceStatus(d)==='relevant');
- const scoped=classified&&scope==='relevant'?relevant:sources;
+ const [industryQuery,setIndustryQuery]=useState(initialQuery),[companyQuery,setCompanyQuery]=useState(classified&&relevant.length?'':initialQuery);
+ const [limit,setLimit]=useState(8),[scope,setScope]=useState<'industry'|'company'>(classified&&relevant.length?'industry':'company');
+ const [company,setCompany]=useState(''),[type,setType]=useState(''),[from,setFrom]=useState(''),[to,setTo]=useState(''),[readable,setReadable]=useState(false);
+ const industryMode=classified&&scope==='industry';
+ const query=industryMode?industryQuery:companyQuery;
+ const scoped=industryMode?relevant:sources;
  const searchable=scoped.map(d=>({...d,headline:briefs.find(b=>b.documentId===d.id)?.headline,summary:briefs.find(b=>b.documentId===d.id)?.summary}));
- const filtered=browseDocuments(searchable,companies,{query,company,type,from,to,readable});
+ const filtered=browseDocuments(searchable,companies,{query,company:industryMode?'':company,type,from,to,readable});
  const types=[...new Set(scoped.map(d=>d.document_type||'other'))];
  const members=companies.filter(c=>scoped.some(d=>d.entity_id===c.id));
- const clear=()=>{setQuery('');setCompany('');setType('');setFrom('');setTo('');setReadable(false);setLimit(8);};
+ const resetFilters=()=>{setCompany('');setType('');setFrom('');setTo('');setReadable(false);setLimit(8);};
+ const clear=()=>{if(industryMode)setIndustryQuery('');else setCompanyQuery('');resetFilters();};
+ const switchScope=(next:'industry'|'company')=>{setScope(next);resetFilters();};
  return <section id="official-documents" className="product-section source-section">
-  <div className="section-title"><h2>공식 발표·자료 <span className="section-count">{scoped.length}</span></h2><input className="source-search" aria-label="공식 자료 검색" placeholder="기업 또는 자료 검색" value={query} onChange={e=>{setQuery(e.target.value);setLimit(8);}}/></div>
-  {classified&&<div className="document-scope" aria-label="자료 범위"><button aria-pressed={scope==='relevant'} onClick={()=>{setScope('relevant');clear();}}>산업 관련 {relevant.length}</button><button aria-pressed={scope==='all'} onClick={()=>{setScope('all');clear();}}>기업 전체 {sources.length}</button></div>}
+  <div className="section-title"><h2>공식 발표·자료 <span className="section-count">{scoped.length}</span></h2></div>
+  {classified&&<div className="document-scope" aria-label="자료 검색 범위"><button type="button" aria-pressed={industryMode} onClick={()=>switchScope('industry')}>산업 관련 자료 <span>{relevant.length}</span></button><button type="button" aria-pressed={!industryMode} onClick={()=>switchScope('company')}>기업별 전체 자료 <span>{sources.length}</span></button></div>}
+  <p className="document-scope-note">{industryMode?'이 산업과 관련된 공식 발표를 찾습니다.':context==='industry'?'이 산업에 속한 기업이 발표한 모든 공식 자료를 찾습니다.':'이 기업의 공식 자료를 찾습니다.'}</p>
+  <label className="source-search-label">{industryMode?'산업 자료 검색':context==='industry'?'기업 자료 검색':'자료 검색'}<input className="source-search" aria-label={industryMode?'산업 자료 검색':context==='industry'?'기업 자료 검색':'자료 검색'} placeholder={industryMode?'발표 제목·산업 주제 검색':context==='industry'?'기업명·발표 제목 검색':'발표 제목·주제 검색'} value={query} onChange={e=>{if(industryMode)setIndustryQuery(e.target.value);else setCompanyQuery(e.target.value);setLimit(8);}}/></label>
   <div className="document-filters" aria-label="자료 필터">
-   {members.length>1&&<label>기업<select aria-label="자료 기업" value={company} onChange={e=>{setCompany(e.target.value);setLimit(8);}}><option value="">모든 기업</option>{members.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label>}
+   {context==='industry'&&!industryMode&&members.length>1&&<label>기업 선택<select aria-label="자료 기업" value={company} onChange={e=>{setCompany(e.target.value);setLimit(8);}}><option value="">모든 기업</option>{members.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label>}
    <label>자료 유형<select aria-label="자료 유형" value={type} onChange={e=>{setType(e.target.value);setLimit(8);}}><option value="">전체 유형</option>{types.map(t=><option value={t} key={t}>{documentTypeLabel(t)}</option>)}</select></label>
    <label>발표일 시작<input aria-label="발표일 시작" type="date" value={from} max={to||undefined} onChange={e=>{setFrom(e.target.value);setLimit(8);}}/></label>
    <label>발표일 끝<input aria-label="발표일 끝" type="date" value={to} min={from||undefined} onChange={e=>{setTo(e.target.value);setLimit(8);}}/></label>
