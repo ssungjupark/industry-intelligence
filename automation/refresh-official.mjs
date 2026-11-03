@@ -188,6 +188,9 @@ export async function refresh({directory=process.cwd(),date=new Date(),batch=12,
  const removedInvalid=beforeCount-tables.documents.length;
  let repaired=0;
  for(const doc of tables.documents){
+  if(!doc.analyzed_at&&doc.title==='default.aspx'){
+   const better=titleOf('Read more',new URL(doc.url));if(better!==doc.title){doc.title=better;repaired++;}
+  }
   if(doc.analyzed_at||!doc.parsed_at||!doc.raw_text||!/^press release$/i.test(doc.title))continue;
   const header=pdfHeaderMetadata(doc.raw_text,sourceById.get(doc.source_registry_id)?.config);
   if(header.title&&header.title!==doc.title){doc.title=header.title;repaired++;}
@@ -201,7 +204,8 @@ export async function refresh({directory=process.cwd(),date=new Date(),batch=12,
   let found;try{found=await discoverSource(source,fetcher);stats.checked++;}
   catch(error){stats.failed++;stats.errors.push(`${source.id}: ${String(error)}`);continue;}
   let perSource=0;
-  for(const candidate of found){
+  // Only the newest visible items; do not slowly backfill a source's entire archive.
+  for(const candidate of found.slice(0,8)){
    if(attempted>=maxNew||perSource>=Math.min(2,source.maxDocsPerRun||2))continue;
    const previous=existing.get(candidate.url);
    if(previous?.parsed_at&&previous.raw_text)continue;

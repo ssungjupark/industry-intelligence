@@ -80,16 +80,18 @@ test('a later run removes unreadable XBRL links and repairs a PDF header without
  const docs=[
   {id:'pdf',url:'https://example.com/press/report.pdf',source_registry_id:source.id,title:'Press Release',raw_text:raw,parsed_at:'2026-11-02T00:00:00Z',analyzed_at:null,published_at:null},
   {id:'xbrl',url:'https://example.com/sec/10-k',source_registry_id:source.id,title:'EX-101.SCH - XBRL TAXONOMY EXTENSION SCHEMA',parsed_at:null,analyzed_at:null},
-  {id:'reviewed',url:'https://example.com/press/reviewed.pdf',source_registry_id:source.id,title:'Press Release',raw_text:raw,parsed_at:'2026-11-02T00:00:00Z',analyzed_at:'2026-11-02T01:00:00Z',published_at:null}
+  {id:'reviewed',url:'https://example.com/press/reviewed.pdf',source_registry_id:source.id,title:'Press Release',raw_text:raw,parsed_at:'2026-11-02T00:00:00Z',analyzed_at:'2026-11-02T01:00:00Z',published_at:null},
+  {id:'generic',url:'https://example.com/press/Production-Update/default.aspx',source_registry_id:source.id,title:'default.aspx',parsed_at:null,analyzed_at:null}
  ];
  await writeFile(join(directory,'data/official-catalog.json'),JSON.stringify({collectedAt:'2026-10-18T00:00:00Z',tables:{entities:[{id:'company-id',name:source.entityName}],source_registry:[{id:source.id}],documents:docs}}));
  await writeFile(join(directory,'data/reading-content.json'),'{}');
  await writeFile(join(directory,'data/analysis.json'),'{}');
  await writeFile(join(directory,'automation/source-registry.json'),JSON.stringify([{...source,config:{pdfTitlePrefix:'Issuer reports',pdfTitleEnd:'\n•',pdfDateLine:0}}]));
  const result=await refresh({directory,date:new Date('2026-11-03T00:00:00Z'),fetcher:async()=>new Response('<html></html>',{status:200,headers:{'content-type':'text/html'}})});
- assert.equal(result.removedInvalid,1);assert.equal(result.repaired,2);
+ assert.equal(result.removedInvalid,1);assert.equal(result.repaired,3);
  const updated=JSON.parse(await readFile(join(directory,'data/official-catalog.json'),'utf8')).tables.documents;
- assert.equal(updated.length,2);assert.equal(updated.find(d=>d.id==='pdf').title,'Issuer reports third-quarter results');
+ assert.equal(updated.length,3);assert.equal(updated.find(d=>d.id==='pdf').title,'Issuer reports third-quarter results');
  assert.equal(updated.find(d=>d.id==='pdf').published_at,'2026-10-29T00:00:00.000Z');
  assert.deepEqual(updated.find(d=>d.id==='reviewed'),docs[2]);
+ assert.equal(updated.find(d=>d.id==='generic').title,'Production Update');
 });
