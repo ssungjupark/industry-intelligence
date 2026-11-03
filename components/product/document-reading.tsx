@@ -10,7 +10,7 @@ export function DocumentReading({document,brief,quotes,rawText,readingContent}:{
  const hasPeriod=brief.metrics.some(m=>m.period);const hasComparison=brief.metrics.some(m=>m.change_text);
  const reading=readReadingContent(readingContent);
  const original=rawText?<OriginalReader content={reading?.format==='pdf'||!reading?readingFromPlainText(rawText):reading} source={document.url}/>:null;
- const preview=!brief.summary?documentPreview(rawText,reading||(rawText?readingFromPlainText(rawText):null)):[];
+ const preview=!brief.summary?documentPreview(rawText,reading||(rawText?readingFromPlainText(rawText):null),document.url):[];
  return <div className="document-reading">
   {brief.summary&&<section className="document-brief-summary"><small>한국어 요약 · AI 작성</small><p className="document-summary">{brief.summary}</p></section>}
   {!brief.summary&&preview.length>0&&<section className="document-preview"><div className="document-preview-heading"><div><small>공식 문서에서 발췌</small><h2>먼저 읽을 내용</h2></div><span>영문 원문 · 분석 전</span></div><ol>{preview.map((point,index)=><li key={`${point.page}-${index}`}><p lang="en">{point.text}</p>{point.page&&sourceLink(document.url,point.page)&&<a href={sourceLink(document.url,point.page)!} target="_blank" rel="noreferrer">원문 {point.page}쪽 ↗</a>}</li>)}</ol></section>}

@@ -37,6 +37,15 @@ export async function fetchOfficial(value,source,fetcher=fetch){
  }
  throw Error('Too many redirects');
 }
+async function fetchSecOfficial(value,source,fetcher){
+ for(let attempt=0;attempt<3;attempt++){
+  try{return await fetchOfficial(value,source,fetcher);}catch(error){
+   if(!/Official source HTTP (?:429|502|503)/.test(String(error))||attempt===2)throw error;
+   await new Promise(resolve=>setTimeout(resolve,1500*(attempt+1)));
+  }
+ }
+ throw Error('SEC fetch retry exhausted');
+}
 function publicationDate(value){
  if(!value||!/(?:19|20)\d{2}/.test(value))return null;
  const text=clean(value).replace(/\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\./gi,'$1');
@@ -117,19 +126,23 @@ export function secFilingDocument(indexUrl,html){
  });
  return files.find(file=>/^EX-99(?:\.1|$)/.test(file.type))||files.find(file=>/^(?:8-K|6-K|10-Q|10-K|20-F)$/.test(file.type))||null;
 }
-async function discoverSource(source,fetcher){
+export async function discoverSource(source,fetcher){
  const urls=[...new Set(source.discoveryUrls)];const results=[];let loaded=0;
  const followLimit=Math.min(8,Math.max(0,Number(source.config?.maxFollowPages)||0));
  for(let index=0;index<urls.length;index++){
-  let fetched;try{fetched=await fetchOfficial(urls[index],source,fetcher);loaded++;}
+  let fetched;try{fetched=source.adapter==='sec_filings'?await fetchSecOfficial(urls[index],source,fetcher):await fetchOfficial(urls[index],source,fetcher);loaded++;}
   catch(error){console.warn(`Discovery ${source.id}: ${String(error)}`);continue;}
   const content=fetched.buffer.toString('utf8');
   if(source.adapter==='sec_filings'){
-   const indexes=discoverRss(source,urls[index],content).slice(0,Math.min(8,Math.max(1,Number(source.config?.maxFilingIndexes)||5)));
+   const indexes=discoverRss(source,urls[index],content).slice(0,Math.min(20,Math.max(1,Number(source.config?.maxFilingIndexes)||5)));
    for(const filing of indexes){
-    try{const page=await fetchOfficial(filing.url,source,fetcher),selected=secFilingDocument(filing.url,page.buffer.toString('utf8'));
+    try{await new Promise(resolve=>setTimeout(resolve,350));const page=await fetchSecOfficial(filing.url,source,fetcher),selected=secFilingDocument(filing.url,page.buffer.toString('utf8'));
      if(!selected)continue;const url=officialUrl(selected.url,source);
-     results.push({...filing,url:url.href,title:`${filing.title} — ${selected.description||selected.type}`,documentType:'filing',rank:results.length});
+     if(source.config?.requireExhibit===true&&!/^EX-99(?:\.1|$)/.test(selected.type))continue;
+     if(source.config?.excludeFilingDescriptions?.some(term=>lower(selected.description).includes(lower(term))))continue;
+     const description=/^(?:EX-99(?:\.1)?|FORM [86]-K|[86]-K)$/i.test(selected.description)?'':selected.description;
+     results.push({...filing,url:url.href,title:description?`${source.entityName} — ${description}`:`${source.entityName} official filing · ${filing.publishedAt?.slice(0,10)||selected.type}`,documentType:'filing',rank:results.length});
+     if(results.length>=3)break;
     }catch(error){console.warn(`SEC filing ${filing.url}: ${String(error)}`);}
    }
   }else results.push(...(source.adapter==='rss'?discoverRss(source,urls[index],content):discoverHtml(source,urls[index],content)));
@@ -148,6 +161,25 @@ function readingParagraphs(text){
   if(part.length<=900)return [{type:'paragraph',content:[{text:part}]}];
   const chunks=part.match(/.{1,900}(?:\s|$)/g)||[part];return chunks.map(chunk=>({type:'paragraph',content:[{text:chunk.trim()}]}));
  });
+}
+function secHeadline(reading,entityName,fallback){
+ const lines=reading.blocks.slice(0,100).flatMap(block=>block.content?[block.content.map(item=>item.text).join('').split(/\n+/)]:[]).flat().map(clean);
+ let updateTitle=null;
+ for(const [index,line] of lines.slice(0,30).entries()){
+  const update=line.match(/\bQ[1-4]\s+20\d{2}\s+Update\b/i);if(update&&index<5)updateTitle=`${entityName} ${update[0]}`;
+  if(line.length<18||line.length>120||/[.!?]$/.test(line)||/^(?:EX-99|[86]-K\b|FORM [86]-K|SECURITIES AND EXCHANGE COMMISSION|REPORT OF FOREIGN ISSUER|PURSUANT TO RULE|INDICATE BY CHECK MARK|DOCUMENTEXHIBIT)/i.test(line))continue;
+  if(line.toLowerCase().startsWith(entityName.toLowerCase())&&/\b(?:reports?|announces?|results?|approv(?:ed|al)?|updates?|launches?|completes?|production|deliveries|to\s+[a-z]+)\b/i.test(line)){
+   const period=lines[0]?.match(/\b[1-4]Q(?:20)?\d{2}\b/i)?.[0];
+   return period&&/\bgroup results\b/i.test(line)&&!/\d/.test(line)?`${line} · ${period.toUpperCase()}`:line;
+  }
+ }
+ if(updateTitle)return updateTitle;
+ const first=lines[0]||'';
+ if(/^6-K\s+\d+\s+\S+\.htm\s+/i.test(first)){
+  const heading=first.replace(/^6-K\s+\d+\s+\S+\.htm\s+/i,'').replace(/\s+[a-z]\w{2,}(?:\s+FORM 6-K)?$/i,'').replace(/\s+PART \d+ OF \d+$/i,'').trim();
+  if(heading.length>=15&&heading.length<=120)return `${entityName} — ${heading}`;
+ }
+ return fallback;
 }
 export async function parseOfficial(fetched,source,title){
  if(fetched.contentType.includes('pdf')||fetched.url.pathname.toLowerCase().endsWith('.pdf')){
@@ -185,7 +217,8 @@ export async function parseOfficial(fetched,source,title){
  if(!blocks.length)blocks.push(...readingParagraphs(clean(root.text())));
  const rawText=blocks.map(block=>block.type==='table'?block.rows.map(row=>row.map(cell=>cell.content[0].text).join(' | ')).join('\n'):block.content[0].text).join('\n\n').slice(0,MAX_TEXT);
  if(rawText.length<200||/^(access denied|just a moment|please enable javascript|403 forbidden)/i.test(pageTitle))throw Error('HTML article body missing or blocked');
- return {rawText,reading:{version:1,format:'html',blocks},pages:null,title:pageTitle,publishedAt};
+ const reading={version:1,format:'html',blocks};
+ return {rawText,reading,pages:null,title:source.adapter==='sec_filings'?secHeadline(reading,source.entityName,pageTitle):pageTitle,publishedAt};
 }
 export function selectSources(registry,day=new Date(),batch=12){
  const active=registry.filter(source=>source.enabled!==false&&source.config?.discoveryMode!=='references'&&['html_links','rss','sec_filings'].includes(source.adapter));

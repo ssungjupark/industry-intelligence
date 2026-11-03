@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {officialUrl,fetchOfficial,discoverHtml,selectSources,stableId,refresh,pdfHeaderMetadata,secFilingDocument,parseOfficial} from './refresh-official.mjs';
+import {officialUrl,fetchOfficial,discoverHtml,discoverSource,selectSources,stableId,refresh,pdfHeaderMetadata,secFilingDocument,parseOfficial} from './refresh-official.mjs';
 
 const source={id:'sample-newsroom',entityName:'Sample Inc',issuer:'Sample newsroom',enabled:true,allowedHosts:['example.com'],adapter:'html_links',discoveryUrls:['https://example.com/news'],rules:[{hrefContainsAny:['/press/'],documentType:'other',autoIngest:true}],config:{},maxDocsPerRun:2};
 const index='<html><a href="/press/new-release">New release</a><a href="https://attacker.example.net/press/fake">Fake</a></html>';
@@ -23,6 +23,14 @@ test('SEC exhibits use direct Archives URLs and reject interactive challenge bod
  const html='<table class="tableFile"><tr><td>1</td><td>Report</td><td><a href="/ix?doc=/Archives/edgar/data/123/456/report.htm">report</a></td><td>8-K</td></tr></table>';
  assert.equal(secFilingDocument(index,html).url,'https://www.sec.gov/Archives/edgar/data/123/456/report.htm');
  await assert.rejects(parseOfficial({buffer:Buffer.from('<script src="/WYyeob_abc"></script>'+('x'.repeat(300))),contentType:'text/plain',url:new URL('https://www.sec.gov/Archives/edgar/data/123/456/report.htm')},source),/challenge/);
+});
+test('scheduled SEC discovery skips administrative 6-K notices',async()=>{
+ const sec={...source,id:'sec-example',entityName:'Example',allowedHosts:['www.sec.gov'],adapter:'sec_filings',discoveryUrls:['https://www.sec.gov/feed'],rules:[{containsAny:['6-K'],documentType:'filing',autoIngest:true}],config:{maxFilingIndexes:2,excludeFilingDescriptions:['TOTAL VOTING RIGHTS']}};
+ const feed='<feed><entry><title>6-K - Report</title><link href="https://www.sec.gov/admin-index.htm"/><filing-date>2026-11-02</filing-date></entry><entry><title>6-K - Report</title><link href="https://www.sec.gov/results-index.htm"/><filing-date>2026-10-30</filing-date></entry></feed>';
+ const index=description=>`<table class="tableFile"><tr><td>1</td><td>${description}</td><td><a href="/Archives/edgar/data/123/report.htm">report</a></td><td>6-K</td></tr></table>`;
+ const fetcher=async url=>new Response(url.pathname==='/feed'?feed:url.pathname==='/admin-index.htm'?index('TOTAL VOTING RIGHTS'):index('THIRD QUARTER RESULTS'),{headers:{'content-type':'text/html'}});
+ const rows=await discoverSource(sec,fetcher);
+ assert.equal(rows.length,1);assert.equal(rows[0].title,'Example — THIRD QUARTER RESULTS');assert.equal(rows[0].publishedAt,'2026-10-30T00:00:00.000Z');
 });
 
 test('daily rotation excludes reference-only sources without hardcoded companies',()=>{
