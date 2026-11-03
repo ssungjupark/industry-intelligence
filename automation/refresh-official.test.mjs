@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {officialUrl,fetchOfficial,discoverHtml,selectSources,stableId,refresh,pdfHeaderMetadata} from './refresh-official.mjs';
+import {officialUrl,fetchOfficial,discoverHtml,selectSources,stableId,refresh,pdfHeaderMetadata,secFilingDocument,parseOfficial} from './refresh-official.mjs';
 
 const source={id:'sample-newsroom',entityName:'Sample Inc',issuer:'Sample newsroom',enabled:true,allowedHosts:['example.com'],adapter:'html_links',discoveryUrls:['https://example.com/news'],rules:[{hrefContainsAny:['/press/'],documentType:'other',autoIngest:true}],config:{},maxDocsPerRun:2};
 const index='<html><a href="/press/new-release">New release</a><a href="https://attacker.example.net/press/fake">Fake</a></html>';
@@ -16,6 +16,13 @@ test('official-host allowlist blocks lookalikes and redirected offsite pages',as
  assert.throws(()=>officialUrl('http://example.com/press/a',source));
  await assert.rejects(fetchOfficial('https://example.com/news',source,async()=>new Response(null,{status:302,headers:{location:'https://example.com.evil.test/press/a'}})));
  assert.equal(discoverHtml(source,source.discoveryUrls[0],index).length,1);
+});
+
+test('SEC exhibits use direct Archives URLs and reject interactive challenge bodies',async()=>{
+ const index='https://www.sec.gov/Archives/edgar/data/123/456/456-index.htm';
+ const html='<table class="tableFile"><tr><td>1</td><td>Report</td><td><a href="/ix?doc=/Archives/edgar/data/123/456/report.htm">report</a></td><td>8-K</td></tr></table>';
+ assert.equal(secFilingDocument(index,html).url,'https://www.sec.gov/Archives/edgar/data/123/456/report.htm');
+ await assert.rejects(parseOfficial({buffer:Buffer.from('<script src="/WYyeob_abc"></script>'+('x'.repeat(300))),contentType:'text/plain',url:new URL('https://www.sec.gov/Archives/edgar/data/123/456/report.htm')},source),/challenge/);
 });
 
 test('daily rotation excludes reference-only sources without hardcoded companies',()=>{
@@ -37,19 +44,25 @@ test('refresh adds a parsed official document once and preserves the analysis fi
  const directory=await mkdtemp(join(tmpdir(),'official-refresh-'));t.after(()=>rm(directory,{recursive:true,force:true}));
  await mkdir(join(directory,'data'));await mkdir(join(directory,'automation'));
  const entity={id:stableId('entity:sample'),name:source.entityName};
- const catalog={collectedAt:'2026-10-18T00:00:00.000Z',tables:{entities:[entity],source_registry:[{id:source.id}],documents:[]}};
+ const catalog={collectedAt:'2026-10-18T00:00:00.000Z',tables:{entities:[entity],entity_industries:[],source_registry:[{id:source.id}],documents:[]}};
  await writeFile(join(directory,'data/official-catalog.json'),JSON.stringify(catalog));
  await writeFile(join(directory,'data/reading-content.json'),'{}');
+ await writeFile(join(directory,'data/coverage-wave.json'),JSON.stringify({tables:{entities:[{id:'new-company',name:'New Company'}],entity_industries:[],source_registry:[{id:'new-source'}],documents:[{id:'new-document',url:'https://example.com/press/previous',entity_id:'new-company',source_registry_id:'new-source',title:'Prior release',parsed_at:'2026-10-01T00:00:00Z',raw_text:'Original reviewed release'}]}}));
+ await writeFile(join(directory,'data/coverage-wave-reading.json'),JSON.stringify({'new-document':{version:1,format:'text',blocks:[]}}));
  const analysis='{"tables":{"signals":[],"evidence_segments":[]}}';
  await writeFile(join(directory,'data/analysis.json'),analysis);
  await writeFile(join(directory,'automation/source-registry.json'),JSON.stringify([source]));
  const first=await refresh({directory,date:new Date('2026-11-03T00:00:00Z'),fetcher});
  assert.deepEqual([first.newDocuments,first.downloaded,first.parsed],[1,1,1]);
  const updated=JSON.parse(await readFile(join(directory,'data/official-catalog.json'),'utf8'));
- assert.equal(updated.tables.documents.length,1);
- assert.equal(updated.tables.documents[0].parsed_at,'2026-11-03T00:00:00.000Z');
- assert.equal(updated.tables.documents[0].analyzed_at,null);
- assert.equal(updated.tables.documents[0].published_at,'2026-10-31T00:00:00.000Z');
+ assert.equal(updated.tables.documents.length,2);
+ assert.equal(updated.tables.entities.length,2);
+ assert.equal(updated.tables.source_registry.length,2);
+ const added=updated.tables.documents.find(row=>row.id!== 'new-document');
+ assert.equal(added.parsed_at,'2026-11-03T00:00:00.000Z');
+ assert.equal(added.analyzed_at,null);
+ assert.equal(added.published_at,'2026-10-31T00:00:00.000Z');
+ assert.ok(JSON.parse(await readFile(join(directory,'data/reading-content.json'),'utf8'))['new-document']);
  assert.equal((await readFile(join(directory,'data/analysis.json'),'utf8')),analysis);
  const second=await refresh({directory,date:new Date('2026-11-04T00:00:00Z'),fetcher});
  assert.equal(second.newDocuments,0);

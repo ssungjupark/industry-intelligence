@@ -102,10 +102,20 @@ export function discoverRss(source,feedUrl,xml){
   const title=clean($(element).find('title').first().text());
   const raw=$(element).find('link').first().attr('href')||$(element).find('link').first().text().trim();if(!raw)return;
   let url;try{url=officialUrl(raw,source,feedUrl);}catch{return;}
-  const date=$(element).find('pubDate,published,updated').first().text();
+  const date=$(element).find('filing-date,pubDate,published,updated').first().text();
   const row=discovered(source,url,title,feedUrl,date,results.length);if(row)results.push(row);
  });
  return [...new Map(results.map(row=>[row.url,row])).values()];
+}
+export function secFilingDocument(indexUrl,html){
+ const $=load(html),files=[];
+ $('table.tableFile tr').each((_,row)=>{
+  const cells=$(row).children('td'),href=cells.eq(2).find('a[href]').first().attr('href');if(!href)return;
+  try{const linked=new URL(href,indexUrl),archive=linked.pathname==='/ix'?linked.searchParams.get('doc'):null;
+   files.push({type:clean(cells.eq(3).text()).toUpperCase(),description:clean(cells.eq(1).text()),url:archive?.startsWith('/Archives/')?new URL(archive,indexUrl).href:linked.href});
+  }catch{/* Malformed filing row. */}
+ });
+ return files.find(file=>/^EX-99(?:\.1|$)/.test(file.type))||files.find(file=>/^(?:8-K|6-K|10-Q|10-K|20-F)$/.test(file.type))||null;
 }
 async function discoverSource(source,fetcher){
  const urls=[...new Set(source.discoveryUrls)];const results=[];let loaded=0;
@@ -114,7 +124,15 @@ async function discoverSource(source,fetcher){
   let fetched;try{fetched=await fetchOfficial(urls[index],source,fetcher);loaded++;}
   catch(error){console.warn(`Discovery ${source.id}: ${String(error)}`);continue;}
   const content=fetched.buffer.toString('utf8');
-  results.push(...(source.adapter==='rss'?discoverRss(source,urls[index],content):discoverHtml(source,urls[index],content)));
+  if(source.adapter==='sec_filings'){
+   const indexes=discoverRss(source,urls[index],content).slice(0,Math.min(8,Math.max(1,Number(source.config?.maxFilingIndexes)||5)));
+   for(const filing of indexes){
+    try{const page=await fetchOfficial(filing.url,source,fetcher),selected=secFilingDocument(filing.url,page.buffer.toString('utf8'));
+     if(!selected)continue;const url=officialUrl(selected.url,source);
+     results.push({...filing,url:url.href,title:`${filing.title} — ${selected.description||selected.type}`,documentType:'filing',rank:results.length});
+    }catch(error){console.warn(`SEC filing ${filing.url}: ${String(error)}`);}
+   }
+  }else results.push(...(source.adapter==='rss'?discoverRss(source,urls[index],content):discoverHtml(source,urls[index],content)));
   if(source.adapter==='html_links'&&index<source.discoveryUrls.length&&source.config?.followLinkSelector){
    const $=load(content);$(source.config.followLinkSelector).each((_,element)=>{
     if(urls.length>=source.discoveryUrls.length+followLimit)return;
@@ -143,6 +161,7 @@ export async function parseOfficial(fetched,source,title){
   return {rawText:raw,reading:{version:1,format:'pdf',blocks},pages:pdf.numPages,title:header.title||title,publishedAt:header.publishedAt};
  }
  const html=fetched.buffer.toString('utf8');
+ if(fetched.url.hostname==='www.sec.gov'&&(/\/ix$/i.test(fetched.url.pathname)||/\/WYyeob_|\/cdn-cgi\/challenge|bot management/i.test(html.slice(0,2000))))throw Error('SEC filing returned an interactive viewer or access challenge');
  if(!fetched.contentType.includes('html')&&!/<html[\s>]/i.test(html)){
   const rawText=html.trim().slice(0,MAX_TEXT);if(rawText.length<200)throw Error('Text too short');
   return {rawText,reading:{version:1,format:'text',blocks:readingParagraphs(rawText)},pages:null,title,publishedAt:null};
@@ -169,7 +188,7 @@ export async function parseOfficial(fetched,source,title){
  return {rawText,reading:{version:1,format:'html',blocks},pages:null,title:pageTitle,publishedAt};
 }
 export function selectSources(registry,day=new Date(),batch=12){
- const active=registry.filter(source=>source.enabled!==false&&source.config?.discoveryMode!=='references'&&['html_links','rss'].includes(source.adapter));
+ const active=registry.filter(source=>source.enabled!==false&&source.config?.discoveryMode!=='references'&&['html_links','rss','sec_filings'].includes(source.adapter));
  if(!active.length)return [];
  const groups=Math.ceil(active.length/batch),index=Math.floor(day.getTime()/86400000)%groups;
  return active.slice(index*batch,(index+1)*batch);
@@ -178,6 +197,19 @@ export async function refresh({directory=process.cwd(),date=new Date(),batch=12,
  const path=name=>`${directory}/${name}`;
  const [catalog,reading,registry]=await Promise.all(['data/official-catalog.json','data/reading-content.json','automation/source-registry.json'].map(async name=>JSON.parse(await readFile(path(name),'utf8'))));
  const tables=catalog.tables;if(!Array.isArray(tables?.documents)||!Array.isArray(tables?.entities)||!Array.isArray(tables?.source_registry))throw Error('Invalid public catalog');
+ // A coverage release is additive. Fold it into the rotating catalog on the next run.
+ let waveMerged=0;
+ try{
+  const wave=JSON.parse(await readFile(path('data/coverage-wave.json'),'utf8'));
+  const waveReading=JSON.parse(await readFile(path('data/coverage-wave-reading.json'),'utf8'));
+  for(const [name,rows] of Object.entries(wave.tables||{})){
+   if(!Array.isArray(rows)||!Array.isArray(tables[name]))throw Error(`Invalid coverage wave table: ${name}`);
+   const key=row=>name==='entity_industries'?`${row.entity_id}|${row.industry_id}`:row.id;
+   const seen=new Set(tables[name].map(key));
+   for(const row of rows)if(!seen.has(key(row))){tables[name].push(row);seen.add(key(row));waveMerged++;}
+  }
+  for(const [id,value] of Object.entries(waveReading))if(!reading[id]){reading[id]=value;waveMerged++;}
+ }catch(error){if(error.code!=='ENOENT')throw error;}
  const originalAnalysis=await readFile(path('data/analysis.json'));
  const companies=new Map(tables.entities.map(row=>[row.name,row]));
  const registered=new Map(tables.source_registry.map(row=>[row.id,row]));
@@ -198,7 +230,7 @@ export async function refresh({directory=process.cwd(),date=new Date(),batch=12,
  }
  const existing=new Map(tables.documents.map(row=>[row.url,row]));
  const selected=selectSources(registry,date,batch);const stats={checked:0,failed:0,discovered:0,downloaded:0,parsed:0,newDocuments:0,retried:0,removedInvalid,repaired,sourceIds:selected.map(s=>s.id),additions:[],errors:[]};
- let changed=removedInvalid>0||repaired>0,attempted=0;
+ let changed=waveMerged>0||removedInvalid>0||repaired>0,attempted=0;
  for(const source of selected){
   if(!registered.has(source.id)||!companies.has(source.entityName))throw Error(`Unregistered public source: ${source.id}`);
   let found;try{found=await discoverSource(source,fetcher);stats.checked++;}
