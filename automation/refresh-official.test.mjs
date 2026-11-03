@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {officialUrl,fetchOfficial,discoverHtml,selectSources,stableId,refresh} from './refresh-official.mjs';
+import {officialUrl,fetchOfficial,discoverHtml,selectSources,stableId,refresh,pdfHeaderMetadata} from './refresh-official.mjs';
 
 const source={id:'sample-newsroom',entityName:'Sample Inc',issuer:'Sample newsroom',enabled:true,allowedHosts:['example.com'],adapter:'html_links',discoveryUrls:['https://example.com/news'],rules:[{hrefContainsAny:['/press/'],documentType:'other',autoIngest:true}],config:{},maxDocsPerRun:2};
 const index='<html><a href="/press/new-release">New release</a><a href="https://attacker.example.net/press/fake">Fake</a></html>';
@@ -23,6 +23,14 @@ test('daily rotation excludes reference-only sources without hardcoded companies
  sources[2]={...sources[2],config:{discoveryMode:'references'}};
  assert.equal(selectSources(sources,new Date('2026-11-03'),2).length,2);
  assert.equal(new Set([0,1].flatMap(i=>selectSources(sources,new Date(Date.UTC(2026,10,3+i)),2).map(s=>s.id))).size,4);
+});
+
+test('index parsing omits XBRL taxonomy links and labels default.aspx from its parent path',()=>{
+ const ir={...source,rules:[{containsAny:['10-k'],hrefContainsAny:['sec'],documentType:'filing',autoIngest:true}]};
+ assert.equal(discoverHtml(ir,'https://example.com/news','<a href="/sec-filings/10-k/2026">EX-101.SCH - XBRL TAXONOMY EXTENSION SCHEMA</a>').length,0);
+ assert.equal(discoverHtml(source,source.discoveryUrls[0],'<a href="/press/New-Product/default.aspx">Read more</a>')[0].title,'New Product');
+ const header=pdfHeaderMetadata('[[PAGE 1]]\nOctober 29, 2026\nIssuer reports third-quarter results\n• Revenue increased', {pdfTitlePrefix:'Issuer reports',pdfTitleEnd:'\n•',pdfDateLine:0});
+ assert.deepEqual(header,{title:'Issuer reports third-quarter results',publishedAt:'2026-10-29T00:00:00.000Z'});
 });
 
 test('refresh adds a parsed official document once and preserves the analysis file byte for byte',async t=>{
@@ -63,4 +71,25 @@ test('failed download stays discovered and retries on next run',async t=>{
  assert.deepEqual([second.newDocuments,second.retried,second.parsed],[0,1,1]);
  const rows=JSON.parse(await readFile(join(directory,'data/official-catalog.json'),'utf8')).tables.documents;
  assert.equal(rows.length,1);assert.ok(rows[0].raw_text.includes('official announcement'));
+});
+
+test('a later run removes unreadable XBRL links and repairs a PDF header without changing analyzed rows',async t=>{
+ const directory=await mkdtemp(join(tmpdir(),'official-repair-'));t.after(()=>rm(directory,{recursive:true,force:true}));
+ await mkdir(join(directory,'data'));await mkdir(join(directory,'automation'));
+ const raw='[[PAGE 1]]\nOctober 29, 2026\nIssuer reports third-quarter results\n• Revenue increased';
+ const docs=[
+  {id:'pdf',url:'https://example.com/press/report.pdf',source_registry_id:source.id,title:'Press Release',raw_text:raw,parsed_at:'2026-11-02T00:00:00Z',analyzed_at:null,published_at:null},
+  {id:'xbrl',url:'https://example.com/sec/10-k',source_registry_id:source.id,title:'EX-101.SCH - XBRL TAXONOMY EXTENSION SCHEMA',parsed_at:null,analyzed_at:null},
+  {id:'reviewed',url:'https://example.com/press/reviewed.pdf',source_registry_id:source.id,title:'Press Release',raw_text:raw,parsed_at:'2026-11-02T00:00:00Z',analyzed_at:'2026-11-02T01:00:00Z',published_at:null}
+ ];
+ await writeFile(join(directory,'data/official-catalog.json'),JSON.stringify({collectedAt:'2026-10-18T00:00:00Z',tables:{entities:[{id:'company-id',name:source.entityName}],source_registry:[{id:source.id}],documents:docs}}));
+ await writeFile(join(directory,'data/reading-content.json'),'{}');
+ await writeFile(join(directory,'data/analysis.json'),'{}');
+ await writeFile(join(directory,'automation/source-registry.json'),JSON.stringify([{...source,config:{pdfTitlePrefix:'Issuer reports',pdfTitleEnd:'\n•',pdfDateLine:0}}]));
+ const result=await refresh({directory,date:new Date('2026-11-03T00:00:00Z'),fetcher:async()=>new Response('<html></html>',{status:200,headers:{'content-type':'text/html'}})});
+ assert.equal(result.removedInvalid,1);assert.equal(result.repaired,2);
+ const updated=JSON.parse(await readFile(join(directory,'data/official-catalog.json'),'utf8')).tables.documents;
+ assert.equal(updated.length,2);assert.equal(updated.find(d=>d.id==='pdf').title,'Issuer reports third-quarter results');
+ assert.equal(updated.find(d=>d.id==='pdf').published_at,'2026-10-29T00:00:00.000Z');
+ assert.deepEqual(updated.find(d=>d.id==='reviewed'),docs[2]);
 });

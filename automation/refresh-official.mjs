@@ -39,20 +39,45 @@ export async function fetchOfficial(value,source,fetcher=fetch){
 }
 function publicationDate(value){
  if(!value||!/(?:19|20)\d{2}/.test(value))return null;
- const text=clean(value);const date=/^\d{4}-\d{2}-\d{2}$/.test(text)?new Date(`${text}T00:00:00Z`):new Date(text);
+ const text=clean(value).replace(/\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\./gi,'$1');
+ const monthFirst=text.match(/^(?:[A-Za-z]+,\s*)?([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})$/);
+ const dayFirst=text.match(/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/);
+ if(monthFirst||dayFirst){
+  const month=(monthFirst?.[1]||dayFirst[2]).slice(0,3).toLowerCase();
+  const index=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'].indexOf(month);
+  if(index<0)return null;
+  const year=Number((monthFirst||dayFirst)[3]),day=Number(monthFirst?.[2]||dayFirst[1]);
+  return publicationDate(`${year}-${String(index+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`);
+ }
+ const date=/^\d{4}-\d{2}-\d{2}$/.test(text)?new Date(`${text}T00:00:00Z`):new Date(text);
  if(!Number.isFinite(date.getTime())||date.getTime()>Date.now()+86400000)return null;
  if(/^\d{4}-\d{2}-\d{2}$/.test(text)&&date.toISOString().slice(0,10)!==text)return null;
  return date.toISOString();
 }
 function matchingRule(source,title,url){
  const label=lower(title),link=lower(url);
+ // Machine-readable XBRL taxonomy attachments are not investor reading documents.
+ if(/\bxbrl\b|\bex-101(?:\.|\b)/i.test(label)||/\.(?:xsd|xml)(?:\?|$)/i.test(link))return null;
  return source.rules?.find(rule=>!(rule.excludesAny||[]).some(term=>label.includes(lower(term))||link.includes(lower(term)))&&
   (!(rule.containsAny?.length)||rule.containsAny.some(term=>label.includes(lower(term))||link.includes(lower(term))))&&
   (!(rule.hrefContainsAny?.length)||rule.hrefContainsAny.some(term=>link.includes(lower(term)))))||null;
 }
 function titleOf(label,url){
  const title=clean(label);if(title.length>=3&&!/^(read article|read more|learn more|download)$/i.test(title))return title.slice(0,240);
- return decodeURIComponent(url.pathname.split('/').filter(Boolean).at(-1)||url.hostname).replace(/[-_]+/g,' ').slice(0,240);
+ const parts=url.pathname.split('/').filter(Boolean);const last=parts.at(-1);
+ const name=last?.toLowerCase()==='default.aspx'?parts.at(-2):last;
+ return decodeURIComponent(name||url.hostname).replace(/[-_]+/g,' ').slice(0,240);
+}
+export function pdfHeaderMetadata(raw,config={}){
+ const first=raw.split('[[PAGE 2]]')[0].replace(/^\[\[PAGE 1\]\]\s*/,'').slice(0,5000);
+ let title=null;
+ if(typeof config.pdfTitlePrefix==='string'&&typeof config.pdfTitleEnd==='string'){
+  const start=first.indexOf(config.pdfTitlePrefix),end=start>=0?first.indexOf(config.pdfTitleEnd,start):-1;
+  if(start>=0&&end>start){const candidate=clean(first.slice(start,end));if(candidate.length<=500)title=candidate;}
+ }
+ const index=config.pdfDateLine;
+ const date=Number.isInteger(index)&&index>=0&&index<16?first.split('\n').filter(Boolean)[index]:null;
+ return {title,publishedAt:publicationDate(date)};
 }
 function discovered(source,url,title,discoveryUrl,publishedAt,rank){
  const rule=matchingRule(source,title,url.href);if(!rule?.autoIngest)return null;
@@ -114,7 +139,8 @@ export async function parseOfficial(fetched,source,title){
   const raw=pages.map((text,index)=>`[[PAGE ${index+1}]]\n${text.trim()}`).join('\n\n').slice(0,MAX_TEXT);
   if(raw.length<200)throw Error('PDF has insufficient text');
   const blocks=pages.flatMap((text,index)=>[{type:'page',page:index+1},...readingParagraphs(text)]);
-  return {rawText:raw,reading:{version:1,format:'pdf',blocks},pages:pdf.numPages,title,publishedAt:null};
+  const header=pdfHeaderMetadata(raw,source.config);
+  return {rawText:raw,reading:{version:1,format:'pdf',blocks},pages:pdf.numPages,title:header.title||title,publishedAt:header.publishedAt};
  }
  const html=fetched.buffer.toString('utf8');
  if(!fetched.contentType.includes('html')&&!/<html[\s>]/i.test(html)){
@@ -155,9 +181,21 @@ export async function refresh({directory=process.cwd(),date=new Date(),batch=12,
  const originalAnalysis=await readFile(path('data/analysis.json'));
  const companies=new Map(tables.entities.map(row=>[row.name,row]));
  const registered=new Map(tables.source_registry.map(row=>[row.id,row]));
+ const sourceById=new Map(registry.map(source=>[source.id,source]));
+ // Repair prior scheduled entries that turned out to be XBRL index attachments.
+ const beforeCount=tables.documents.length;
+ tables.documents=tables.documents.filter(doc=>doc.parsed_at||doc.analyzed_at||!/\bxbrl\b|\bex-101(?:\.|\b)/i.test(doc.title));
+ const removedInvalid=beforeCount-tables.documents.length;
+ let repaired=0;
+ for(const doc of tables.documents){
+  if(doc.analyzed_at||!doc.parsed_at||!doc.raw_text||!/^press release$/i.test(doc.title))continue;
+  const header=pdfHeaderMetadata(doc.raw_text,sourceById.get(doc.source_registry_id)?.config);
+  if(header.title&&header.title!==doc.title){doc.title=header.title;repaired++;}
+  if(!doc.published_at&&header.publishedAt){doc.published_at=header.publishedAt;repaired++;}
+ }
  const existing=new Map(tables.documents.map(row=>[row.url,row]));
- const selected=selectSources(registry,date,batch);const stats={checked:0,failed:0,discovered:0,downloaded:0,parsed:0,newDocuments:0,retried:0,sourceIds:selected.map(s=>s.id),additions:[],errors:[]};
- let changed=false,attempted=0;
+ const selected=selectSources(registry,date,batch);const stats={checked:0,failed:0,discovered:0,downloaded:0,parsed:0,newDocuments:0,retried:0,removedInvalid,repaired,sourceIds:selected.map(s=>s.id),additions:[],errors:[]};
+ let changed=removedInvalid>0||repaired>0,attempted=0;
  for(const source of selected){
   if(!registered.has(source.id)||!companies.has(source.entityName))throw Error(`Unregistered public source: ${source.id}`);
   let found;try{found=await discoverSource(source,fetcher);stats.checked++;}
