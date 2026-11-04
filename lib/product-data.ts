@@ -79,7 +79,7 @@ export const productData=cache(async (industrySlug?:string,entitySlug?:string):P
     const catalyst=selectCatalyst(events.filter((ev) => ev.entity_id===e.id),docs,groundedEvents,today,p);
     const candidates=documents.filter((d) => d.entity_id===e.id && eligibleDocument(d) && sourceLink(d.url)).map(d=>industry?annotateDocumentRelevance(d,industry.metadata):d);
     const latest=candidates.filter(d=>!industry?.metadata?.documentRelevance||relevanceStatus(d)==='relevant').sort(compareDocuments)[0] || null;
-    return {...e,recent,metric,catalyst,latest:latest?publicDocument(latest):null,updated:recent?.updated || latest?.published_at || latest?.created_at || null};
+    return {...e,recent,metric,catalyst,latest:latest?publicDocument(latest):null,updated:[recent?.updated,latest?.published_at||latest?.created_at].filter((value):value is string=>!!value).sort().at(-1)||null};
   });
   const runs=await readRows<{id:string;target_entity_id:string;status:string}>("strategy_runs",{status:"active"},company?{column:"target_entity_id",ids:[company.id]}:undefined);
   const [items,implicationLinks]=await Promise.all([

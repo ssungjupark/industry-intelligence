@@ -71,14 +71,16 @@ export function documentPreview(rawText:string|null,reading:ReadingContent|null,
  }
  if(bullets.length)return bullets.slice(0,5);
  if(!reading)return [];
- const points:PreviewPoint[]=[];let page:number|null=null;
+ const candidates:Array<{point:PreviewPoint;score:number;order:number}>=[];let page:number|null=null;
  for(const block of reading.blocks){
   if(block.type==='page'){page=block.page;continue;}
   if(block.type!=='paragraph'&&block.type!=='list')continue;
   const texts=block.type==='list'?block.items.map(item=>item.flatMap(b=>b.type==='paragraph'&&'content' in b?[inlineText(b.content)]:[]).join(' ')):block.type==='paragraph'&&'content' in block?[inlineText(block.content)]:[];
   for(const value of texts){const text=clean(value);if(text.length<70||text.length>500||contact.test(text)||/^[A-Z][a-z]+ \d{1,2},? \d{4}$/.test(text))continue;
-   points.push({text,page});if(points.length===3)return points;
+   const score=Number(/(?:\$|€|£|\b\d+(?:[.,]\d+)?\s*(?:%|billion|million|units|vehicles|patients))\b/i.test(text))*2+Number(/\b(?:agreement|investment|results|revenue|approved|approval|trial|sales|guidance|capacity|production|contract|launch|facility|manufacturing|deliveries|outlook)\b/i.test(text))*2-Number(/\b(?:announcement coincides|supplier awards|for more information|forward-looking statements|media contact|investor contact)\b/i.test(text))*4;
+   candidates.push({point:{text,page},score,order:candidates.length});
   }
  }
- return points;
+ const useful=candidates.filter(c=>c.score>0);
+ return (useful.length?useful:candidates).sort((a,b)=>b.score-a.score||a.order-b.order).slice(0,3).sort((a,b)=>a.order-b.order).map(c=>c.point);
 }

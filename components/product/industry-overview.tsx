@@ -7,7 +7,7 @@ import {PublicationTimeline} from './publication-timeline';
 
 export function IndustryOverview({data}:{data:ProductData}) {
  return <>
-  {data.changes.length>0&&<ChangeFeed changes={data.changes} title="Recent Changes"/>}
+  {data.changes.length>0&&<ChangeFeed changes={data.changes}/>}
   <PublicationTimeline documents={data.documents} companies={data.companies}/>
   <CompanyTable companies={data.members}/>
   <CatalystAgenda companies={data.members}/>

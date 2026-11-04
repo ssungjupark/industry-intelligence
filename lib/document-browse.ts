@@ -20,5 +20,15 @@ export function browseDocuments(documents:ProductDocument[],companies:SearchComp
 export function recentPublications(documents:ProductDocument[],companies:SearchCompany[],limit=8){
  const classified=documents.some(d=>d.metadata?.industryRelevance);
  // Undated documents remain searchable below; collection time is never a release date.
- return browseDocuments(documents,companies,{relevantOnly:classified}).filter(d=>!!d.published_at).slice(0,limit);
+ const dated=browseDocuments(documents,companies,{relevantOnly:classified}).filter(d=>!!d.published_at);
+ if(!dated.length)return [];
+ // Scheduling notices remain in the archive but do not displace actual releases.
+ const notice=/(?:sets? (?:a )?conference call|to host (?:a )?(?:technology )?webinar|will report (?:its )?(?:quarterly|financial|fiscal)|announces? (?:the )?date of|invitation to (?:a )?(?:conference|webcast))/i;
+ const cutoff=new Date(new Date(dated[0].published_at!).getTime()-45*86400000).toISOString();
+ const current=dated.filter(d=>d.published_at!>=cutoff),older=dated.filter(d=>d.published_at!<cutoff);
+ const ordered=[...current.filter(d=>!notice.test(d.title)),...current.filter(d=>notice.test(d.title)),...older.filter(d=>!notice.test(d.title)),...older.filter(d=>notice.test(d.title))];
+ const selected:ProductDocument[]=[],counts=new Map<string,number>();
+ for(const row of ordered){if((counts.get(row.entity_id)||0)>=2)continue;selected.push(row);counts.set(row.entity_id,(counts.get(row.entity_id)||0)+1);if(selected.length>=limit)return selected;}
+ for(const row of ordered){if(selected.some(d=>d.id===row.id))continue;selected.push(row);if(selected.length>=limit)break;}
+ return selected;
 }
