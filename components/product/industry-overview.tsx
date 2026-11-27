@@ -4,9 +4,11 @@ import {CompanyTable} from './company-table';
 import {CatalystAgenda} from './catalyst-agenda';
 import {SourceDocuments} from './source-documents';
 import {PublicationTimeline} from './publication-timeline';
+import {IndustryBriefing} from './industry-briefing';
 
 export function IndustryOverview({data}:{data:ProductData}) {
  return <>
+  <IndustryBriefing industrySlug={data.industry?.slug}/>
   {data.changes.length>0&&<ChangeFeed changes={data.changes}/>}
   <PublicationTimeline documents={data.documents} companies={data.companies}/>
   <CompanyTable companies={data.members}/>

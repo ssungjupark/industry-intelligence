@@ -6,10 +6,12 @@ import { sourceLink } from "@/lib/source-link";
 import { EvidenceDrawer } from "./evidence-drawer";
 import {acquisitionLabel} from '@/lib/catalog-coverage';
 import {displayDocumentTitle} from "@/lib/document-relevance";
+import {productSearch} from "@/lib/product-search";
 import { updated } from "./format";
 export function CompanyTable({companies}:{companies:CompanySummary[]}) {
  const [q,setQ]=useState("");const [all,setAll]=useState(true);const [page,setPage]=useState(0);
- const available=companies.filter(c=>all||c.recent||c.metric||c.catalyst||c.latest);const filtered=available.filter(c=>`${c.name} ${c.ticker||""} ${c.metadata?.label||""} ${c.metadata?.role||""}`.toLowerCase().includes(q.toLowerCase()));const rows=filtered.slice(page*20,page*20+20);
+ const matches=productSearch(q);
+ const available=companies.filter(c=>all||c.recent||c.metric||c.catalyst||c.latest);const filtered=available.filter(c=>matches(c.name,c.ticker,c.metadata?.label,c.metadata?.role));const rows=filtered.slice(page*20,page*20+20);
  const showMetric=filtered.length>0&&filtered.filter(c=>c.metric).length*2>=filtered.length;
  const showCatalyst=filtered.length>0&&filtered.filter(c=>c.catalyst).length*2>=filtered.length;
  return <section className="product-section"><div className="section-title"><h2>주요 기업 <span className="section-count">{companies.length}</span></h2><div className="table-controls"><input aria-label="산업 내 기업 검색" placeholder="기업명 / 종목코드" value={q} onChange={e=>{setQ(e.target.value);setPage(0);}}/><label><input type="checkbox" checked={all} onChange={e=>{setAll(e.target.checked);setPage(0);}}/>모든 기업</label></div></div><div className="product-table-scroll"><table className="product-table"><thead><tr><th>기업</th><th>최근 확인된 내용</th>{showMetric&&<th>핵심 지표</th>}{showCatalyst&&<th>다음 일정</th>}<th>최근 자료</th></tr></thead><tbody>{rows.map(c=>{

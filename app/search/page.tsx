@@ -2,12 +2,14 @@ import Link from "@/lib/site-link";
 import {productData} from '@/lib/product-data';
 import {ChangeFeed} from '@/components/product/changes';
 import {SourceDocuments} from '@/components/product/source-documents';
+import {productSearch} from '@/lib/product-search';
 export const dynamic='force-dynamic';
 export default async function Search({searchParams}:{searchParams:Promise<{q?:string;archive?:string}>}){
- const {q='',archive=''}=await searchParams,data=await productData(),term=q.trim().toLowerCase();
- const industries=data.industries.filter(i=>`${i.name} ${i.metadata?.label||''}`.toLowerCase().includes(term));
- const companies=data.companies.filter(c=>`${c.name} ${c.ticker||''} ${c.metadata?.label||''}`.toLowerCase().includes(term));
- const changes=data.changes.filter(c=>`${c.title} ${c.topic} ${c.companies.join(' ')}`.toLowerCase().includes(term));
+ const {q='',archive=''}=await searchParams,data=await productData(),term=q.trim();
+ const matches=productSearch(term);
+ const industries=data.industries.filter(i=>matches(i.name,i.metadata?.label));
+ const companies=data.companies.filter(c=>matches(c.name,c.ticker,c.metadata?.label));
+ const changes=data.changes.filter(c=>matches(c.title,c.topic,...c.companies));
  return <><header className="page-heading"><h1>검색</h1></header><form className="search-form" action="/search"><input name="q" defaultValue={q} placeholder="산업·기업·공식자료 제목 검색" aria-label="산업·기업·공식자료 검색"/><button>검색</button></form>
   {!term&&archive!=='1'&&<p className="search-intro">산업명, 기업명, 공식자료 제목으로 찾아보세요.</p>}
   {term&&<>

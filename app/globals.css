@@ -46,3 +46,41 @@
 .brief-metrics td{vertical-align:top;white-space:normal}
 .brief-metrics td:nth-child(2){font-variant-numeric:tabular-nums;min-width:125px}
 @media(max-width:600px){.document-brief-summary,.document-preview{padding:20px}.document-brief-summary .document-summary{font-size:16px}.document-preview-heading{align-items:start;flex-direction:column;gap:4px}.document-preview li p{font-size:14px}}
+
+.industry-briefing {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--accent);
+  border-radius: 6px;
+  padding: 22px clamp(17px, 3vw, 32px) 8px;
+}
+.industry-briefing > header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 18px;
+  padding-bottom: 14px;
+}
+.industry-briefing > header > h2 { font-size: 20px; margin: 0; }
+.industry-briefing > header > p { margin: 0; font-size: 12px; color: var(--muted); }
+.industry-briefing ol { list-style: none; padding: 0; margin: 0; }
+.industry-briefing li { border-top: 1px solid var(--line); padding: 15px 0 17px; }
+.industry-briefing h3 { font-size: 17px; line-height: 1.45; margin: 4px 0 7px; }
+.industry-briefing article p { font-size: 14px; line-height: 1.6; margin: 0 0 5px; max-width: 75ch; }
+.industry-briefing .industry-briefing-meta {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 12px;
+  color: var(--muted);
+}
+.industry-briefing article strong { color: var(--ink); }
+.industry-briefing article a {
+  display: inline-block;
+  margin-top: 5px;
+  color: var(--accent);
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

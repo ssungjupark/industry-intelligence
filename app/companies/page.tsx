@@ -1,9 +1,11 @@
 import Link from "@/lib/site-link";
 import {productDirectory} from '@/lib/product-data';
+import {productSearch} from '@/lib/product-search';
 export const dynamic='force-dynamic';
 export default async function Companies({searchParams}:{searchParams:Promise<{q?:string;industry?:string;page?:string}>}){
  const {q='',industry='',page='1'}=await searchParams;const data=await productDirectory();
- const rows=data.companies.filter(c=>(!industry||c.industries.some(i=>i.slug===industry))&&`${c.name} ${c.ticker||''} ${c.metadata?.label||''}`.toLowerCase().includes(q.toLowerCase()));
+ const matches=productSearch(q);
+ const rows=data.companies.filter(c=>(!industry||c.industries.some(i=>i.slug===industry))&&matches(c.name,c.ticker,c.metadata?.label));
  const pages=Math.max(1,Math.ceil(rows.length/24));const n=Math.min(pages,Math.max(1,Math.floor(Number(page)||1)));
  const href=(p:number)=>`/companies?${new URLSearchParams({q,industry,page:String(p)})}`;
  return <><header className="page-heading"><div><h1>기업</h1><p className="directory-summary">{rows.length}개 기업</p></div></header><form className="search-form directory-filters"><input name="q" defaultValue={q} placeholder="기업명 / 종목코드" aria-label="기업 검색"/><select name="industry" defaultValue={industry} aria-label="산업 선택"><option value="">모든 산업</option>{data.industries.map(i=><option key={i.id} value={i.slug}>{typeof i.metadata?.label==='string'?i.metadata.label:i.name}</option>)}</select><button>검색</button></form>
