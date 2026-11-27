@@ -164,3 +164,10 @@
   }
   .home-overview .publication-row time { padding: 0; }
 }
+
+@media(min-width:1051px) {
+  .publication-timeline-company .publication-row { grid-template-columns: 85px minmax(0, 1fr) 80px 64px; }
+}
+@media(min-width:681px) and (max-width:1050px) {
+  .publication-timeline-company .publication-row { grid-template-columns: 80px minmax(0, 1fr); }
+}

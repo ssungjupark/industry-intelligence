@@ -49,6 +49,8 @@ async function fetchSecOfficial(value,source,fetcher){
 function publicationDate(value){
  if(!value||!/(?:19|20)\d{2}/.test(value))return null;
  const text=clean(value).replace(/\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\./gi,'$1');
+ const local=text.match(/^(\d{4})\s*[.년]\s*(\d{1,2})\s*[.월]\s*(\d{1,2})\s*[.일]?$/);
+ if(local)return publicationDate(`${local[1]}-${local[2].padStart(2,'0')}-${local[3].padStart(2,'0')}`);
  const monthFirst=text.match(/^(?:[A-Za-z]+,\s*)?([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})$/);
  const dayFirst=text.match(/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/);
  if(monthFirst||dayFirst){
@@ -94,13 +96,14 @@ function discovered(source,url,title,discoveryUrl,publishedAt,rank){
 }
 export function discoverHtml(source,pageUrl,html){
  const $=load(html);$('script,style,noscript').remove();const results=[];
- $('a[href]').each((_,element)=>{
+ $(source.config?.linkSelector||'a[href]').each((_,element)=>{
   const raw=$(element).attr('href')?.trim();if(!raw||/^(javascript:|mailto:)/i.test(raw))return;
   let url;try{url=officialUrl(raw,source,pageUrl);}catch{return;}
   if(url.href.replace(/\/$/,'')===pageUrl.replace(/\/$/,'')||source.config?.excludeUrls?.includes(url.href))return;
   const container=source.config?.linkContainer?$(element).closest(source.config.linkContainer):$(element);
   const title=source.config?.linkTitleSelector?container.find(source.config.linkTitleSelector).first().text():'';
-  const row=discovered(source,url,title||container.text(),pageUrl,container.find('time[datetime]').first().attr('datetime'),results.length);
+  const date=container.find(source.config?.linkDateSelector||'time[datetime]').first();
+  const row=discovered(source,url,title||container.text(),pageUrl,date.attr('datetime')||date.text(),results.length);
   if(row)results.push(row);
  });
  return [...new Map(results.map(row=>[row.url,row])).values()];
@@ -145,7 +148,7 @@ export async function discoverSource(source,fetcher){
      if(results.length>=3)break;
     }catch(error){console.warn(`SEC filing ${filing.url}: ${String(error)}`);}
    }
-  }else results.push(...(source.adapter==='rss'?discoverRss(source,urls[index],content):discoverHtml(source,urls[index],content)));
+  }else results.push(...(source.adapter==='rss'?discoverRss(source,fetched.url.href,content):discoverHtml(source,fetched.url.href,content)));
   if(source.adapter==='html_links'&&index<source.discoveryUrls.length&&source.config?.followLinkSelector){
    const $=load(content);$(source.config.followLinkSelector).each((_,element)=>{
     if(urls.length>=source.discoveryUrls.length+followLimit)return;
@@ -202,6 +205,7 @@ export async function parseOfficial(fetched,source,title){
  const dateElement=source.config?.dateSelector?$(source.config.dateSelector).first():null;
  const publishedAt=publicationDate($('meta[property="article:published_time"],meta[name="datePublished"],meta[name="pubdate"]').first().attr('content')||dateElement?.attr('datetime')||dateElement?.text());
  $('script,style,noscript,nav,footer,header').remove();
+ if(source.config?.excludeContentSelector)$(source.config.excludeContentSelector).remove();
  const root=source.config?.contentSelector?$(source.config.contentSelector).first():$('article').first().length?$('article').first():$('main').first().length?$('main').first():$('body').first();
  if(!root.length)throw Error('HTML article body missing');
  const blocks=[];
@@ -222,27 +226,36 @@ export async function parseOfficial(fetched,source,title){
 }
 export function selectSources(registry,day=new Date(),batch=12){
  const active=registry.filter(source=>source.enabled!==false&&source.config?.discoveryMode!=='references'&&['html_links','rss','sec_filings'].includes(source.adapter));
- if(!active.length)return [];
- const groups=Math.ceil(active.length/batch),index=Math.floor(day.getTime()/86400000)%groups;
- return active.slice(index*batch,(index+1)*batch);
+ const daily=active.filter(source=>source.cadence==='daily');
+ const rotating=active.filter(source=>source.cadence!=='daily');
+ if(!rotating.length)return daily;
+ const groups=Math.ceil(rotating.length/batch),index=Math.floor(day.getTime()/86400000)%groups;
+ return [...daily,...rotating.slice(index*batch,(index+1)*batch)];
 }
-export async function refresh({directory=process.cwd(),date=new Date(),batch=12,maxNew=12,fetcher=fetch,dryRun=false}={}){
- const path=name=>`${directory}/${name}`;
- const [catalog,reading,registry]=await Promise.all(['data/official-catalog.json','data/reading-content.json','automation/source-registry.json'].map(async name=>JSON.parse(await readFile(path(name),'utf8'))));
- const tables=catalog.tables;if(!Array.isArray(tables?.documents)||!Array.isArray(tables?.entities)||!Array.isArray(tables?.source_registry))throw Error('Invalid public catalog');
- // A coverage release is additive. Fold it into the rotating catalog on the next run.
- let waveMerged=0;
+async function mergeCoverage(path,stem,tables,reading){
+ let merged=0;
  try{
-  const wave=JSON.parse(await readFile(path('data/coverage-wave.json'),'utf8'));
-  const waveReading=JSON.parse(await readFile(path('data/coverage-wave-reading.json'),'utf8'));
+  const wave=JSON.parse(await readFile(path(`data/${stem}.json`),'utf8'));
+  const waveReading=JSON.parse(await readFile(path(`data/${stem}-reading.json`),'utf8'));
   for(const [name,rows] of Object.entries(wave.tables||{})){
    if(!Array.isArray(rows)||!Array.isArray(tables[name]))throw Error(`Invalid coverage wave table: ${name}`);
    const key=row=>name==='entity_industries'?`${row.entity_id}|${row.industry_id}`:row.id;
    const seen=new Set(tables[name].map(key));
-   for(const row of rows)if(!seen.has(key(row))){tables[name].push(row);seen.add(key(row));waveMerged++;}
+   for(const row of rows)if(!seen.has(key(row))){tables[name].push(row);seen.add(key(row));merged++;}
   }
-  for(const [id,value] of Object.entries(waveReading))if(!reading[id]){reading[id]=value;waveMerged++;}
+  for(const [id,value] of Object.entries(waveReading))if(!reading[id]){reading[id]=value;merged++;}
  }catch(error){if(error.code!=='ENOENT')throw error;}
+ return merged;
+}
+// Percent escape case varies across WordPress index pages and RSS feeds.
+const documentKey=url=>url.replace(/%[a-f0-9]{2}/gi,part=>part.toUpperCase());
+export async function refresh({directory=process.cwd(),date=new Date(),batch=12,maxNew=12,dailyMaxNew=12,group='all',fetcher=fetch,dryRun=false}={}){
+ const path=name=>`${directory}/${name}`;
+ const [catalog,reading,registry]=await Promise.all(['data/official-catalog.json','data/reading-content.json','automation/source-registry.json'].map(async name=>JSON.parse(await readFile(path(name),'utf8'))));
+ const tables=catalog.tables;if(!Array.isArray(tables?.documents)||!Array.isArray(tables?.entities)||!Array.isArray(tables?.source_registry))throw Error('Invalid public catalog');
+ // Fold reviewed additions into the catalog before looking up scheduled entities and URLs.
+ let waveMerged=0;
+ for(const stem of ['coverage-wave','korea-coverage'])waveMerged+=await mergeCoverage(path,stem,tables,reading);
  const originalAnalysis=await readFile(path('data/analysis.json'));
  const companies=new Map(tables.entities.map(row=>[row.name,row]));
  const registered=new Map(tables.source_registry.map(row=>[row.id,row]));
@@ -261,28 +274,38 @@ export async function refresh({directory=process.cwd(),date=new Date(),batch=12,
   if(header.title&&header.title!==doc.title){doc.title=header.title;repaired++;}
   if(!doc.published_at&&header.publishedAt){doc.published_at=header.publishedAt;repaired++;}
  }
- const existing=new Map(tables.documents.map(row=>[row.url,row]));
- const selected=selectSources(registry,date,batch);const stats={checked:0,failed:0,discovered:0,downloaded:0,parsed:0,newDocuments:0,retried:0,removedInvalid,repaired,sourceIds:selected.map(s=>s.id),additions:[],errors:[]};
- let changed=waveMerged>0||removedInvalid>0||repaired>0,attempted=0;
+ const existing=new Map(tables.documents.filter(row=>row.url).map(row=>[documentKey(row.url),row]));
+ const selected=selectSources(registry,date,batch).filter(source=>group==='all'||source.cadence==='daily');
+ const stats={checked:0,failed:0,discovered:0,downloaded:0,parsed:0,newDocuments:0,retried:0,removedInvalid,repaired,sourceIds:selected.map(s=>s.id),additions:[],errors:[]};
+ let changed=waveMerged>0||removedInvalid>0||repaired>0;
+ const attempts={daily:0,rotating:0};
+ const budgets={daily:dailyMaxNew,rotating:maxNew};
  for(const source of selected){
   if(!registered.has(source.id)||!companies.has(source.entityName))throw Error(`Unregistered public source: ${source.id}`);
   let found;try{found=await discoverSource(source,fetcher);stats.checked++;}
   catch(error){stats.failed++;stats.errors.push(`${source.id}: ${String(error)}`);continue;}
   let perSource=0;
+  const lane=source.cadence==='daily'?'daily':'rotating';
   // Only the newest visible items; do not slowly backfill a source's entire archive.
   for(const candidate of found.slice(0,8)){
-   if(attempted>=maxNew||perSource>=Math.min(2,source.maxDocsPerRun||2))continue;
-   const previous=existing.get(candidate.url);
-   if(previous?.parsed_at&&previous.raw_text)continue;
+   if(attempts[lane]>=budgets[lane]||perSource>=Math.min(2,source.maxDocsPerRun||2))break;
    const now=date.toISOString(),company=companies.get(source.entityName);
+   const key=documentKey(candidate.url);
+   const previous=existing.get(key);
+   if(previous&&(previous.entity_id!==company.id||previous.analyzed_at||previous.parsed_at&&previous.raw_text))continue;
    const doc=previous||{id:stableId('document:'+candidate.url),entity_id:company.id,source_registry_id:source.id,title:candidate.title,url:candidate.url,document_type:candidate.documentType,issuer:source.issuer,source_tier:1,verification_status:'verified',ingest_status:'discovered',published_at:candidate.publishedAt,created_at:now,discovered_at:now,downloaded_at:null,parsed_at:null,analyzed_at:null,raw_text:null,pages:null,metadata:{discoveryRank:candidate.rank},acquisition:{method:null,sha256:null,finalUrl:candidate.url}};
-   if(previous)stats.retried++;else {existing.set(candidate.url,doc);tables.documents.push(doc);stats.discovered++;stats.newDocuments++;changed=true;}
+   if(previous)stats.retried++;else {existing.set(key,doc);tables.documents.push(doc);stats.discovered++;stats.newDocuments++;changed=true;}
    stats.additions.push({sourceId:source.id,title:candidate.title,url:candidate.url,publishedAt:candidate.publishedAt,retry:!!previous});
-   perSource++;attempted++;
+   perSource++;attempts[lane]++;
    try{
-    const fetched=await fetchOfficial(candidate.url,source,fetcher);doc.downloaded_at=now;doc.acquisition={method:'http',sha256:hash(fetched.buffer),finalUrl:fetched.url.href};stats.downloaded++;changed=true;
+    const fetched=await fetchOfficial(candidate.url,source,fetcher);
+    const sha256=hash(fetched.buffer);
+    if(!doc.downloaded_at||doc.acquisition?.sha256!==sha256){
+     doc.downloaded_at=now;doc.acquisition={method:'http',sha256,finalUrl:fetched.url.href};changed=true;
+    }
+    stats.downloaded++;
     const parsed=await parseOfficial(fetched,source,candidate.title);
-    doc.raw_text=parsed.rawText;doc.pages=parsed.pages;doc.title=parsed.title;doc.published_at=parsed.publishedAt||candidate.publishedAt;doc.parsed_at=now;reading[doc.id]=parsed.reading;stats.parsed++;
+    doc.raw_text=parsed.rawText;doc.pages=parsed.pages;doc.title=parsed.title;doc.published_at=parsed.publishedAt||candidate.publishedAt||doc.published_at;doc.parsed_at=now;reading[doc.id]=parsed.reading;stats.parsed++;changed=true;
    }catch(error){stats.errors.push(`${source.id} ${candidate.url}: ${String(error)}`);}
   }
  }
@@ -305,6 +328,8 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const args=new Set(process.argv.slice(2));
  const batch=Number(process.argv.find(arg=>arg.startsWith('--batch='))?.slice(8)||12);
  const maxNew=Number(process.argv.find(arg=>arg.startsWith('--max-new='))?.slice(10)||12);
+ const group=process.argv.find(arg=>arg.startsWith('--group='))?.slice(8)||'all';
  if(!Number.isInteger(batch)||batch<1||batch>80||!Number.isInteger(maxNew)||maxNew<1||maxNew>40)throw Error('Invalid run limits');
- await refresh({batch,maxNew,dryRun:args.has('--dry-run')});
+ if(!['all','daily'].includes(group))throw Error('Invalid source group');
+ await refresh({batch,maxNew,group,dryRun:args.has('--dry-run')});
 }

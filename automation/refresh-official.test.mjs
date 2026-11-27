@@ -40,6 +40,47 @@ test('daily rotation excludes reference-only sources without hardcoded companies
  assert.equal(new Set([0,1].flatMap(i=>selectSources(sources,new Date(Date.UTC(2026,10,3+i)),2).map(s=>s.id))).size,4);
 });
 
+test('daily sources keep their place every day without displacing rotating sources',()=>{
+ const daily={...source,id:'daily',cadence:'daily'};
+ const rotating=Array.from({length:4},(_,i)=>({...source,id:`rotating-${i}`}));
+ const days=[3,4].map(day=>selectSources([daily,...rotating],new Date(Date.UTC(2026,10,day)),2).map(item=>item.id));
+ assert.equal(days[0][0],'daily');
+ assert.equal(days[1][0],'daily');
+ assert.equal(new Set(days.flatMap(day=>day.slice(1))).size,4);
+});
+
+test('official lists preserve the article title and Korean publication date',()=>{
+ const configured={...source,config:{linkSelector:'a.item',linkContainer:'li',linkTitleSelector:'a.item',linkDateSelector:'.date'}};
+ const html='<a href="/press/navigation">Navigation</a><li><a href="/press/1" class="item">공식 발표</a><span class="date">2026.11.3.</span></li><li><a href="/press/2" class="item">정기 공시</a><span class="date">2026년 11월 4일</span></li><li><a href="/press/3" class="item">오류 날짜</a><span class="date">2026.02.30</span></li>';
+ assert.deepEqual(discoverHtml(configured,source.discoveryUrls[0],html).map(({title,publishedAt})=>[title,publishedAt]),[
+  ['공식 발표','2026-11-03T00:00:00.000Z'],['정기 공시','2026-11-04T00:00:00.000Z'],['오류 날짜',null],
+ ]);
+});
+
+test('daily refresh registers supplemental catalog rows and preserves prior documents and analysis',async t=>{
+ const directory=await mkdtemp(join(tmpdir(),'official-daily-'));t.after(()=>rm(directory,{recursive:true,force:true}));
+ await mkdir(join(directory,'data'));await mkdir(join(directory,'automation'));
+ const base={tables:{entities:[],entity_industries:[],source_registry:[],documents:[]}};
+ const overlay={tables:{entities:[{id:'new-company',name:source.entityName}],entity_industries:[],source_registry:[{id:source.id}],documents:[
+  {id:'old',entity_id:'new-company',source_registry_id:source.id,title:'Prior release',url:'https://example.com/press/%ED%95%9C',parsed_at:'2026-10-01T00:00:00Z',raw_text:'Original reviewed release'},
+ ]}};
+ await writeFile(join(directory,'data/official-catalog.json'),JSON.stringify(base));
+ await writeFile(join(directory,'data/reading-content.json'),'{}');
+ await writeFile(join(directory,'data/korea-coverage.json'),JSON.stringify(overlay));
+ await writeFile(join(directory,'data/korea-coverage-reading.json'),'{"old":{"version":1,"format":"text","blocks":[]}}');
+ const analysis='{"tables":{"signals":[]}}';
+ await writeFile(join(directory,'data/analysis.json'),analysis);
+ await writeFile(join(directory,'automation/source-registry.json'),JSON.stringify([{...source,cadence:'daily'}]));
+ const fromIndex='<a href="/press/%ed%95%9c">Prior release</a>'+index;
+ const first=await refresh({directory,group:'daily',date:new Date('2026-11-03'),fetcher:async url=>url.pathname==='/news'?new Response(fromIndex):fetcher(url)});
+ assert.deepEqual([first.checked,first.newDocuments,first.parsed],[1,1,1]);
+ const days=JSON.parse(await readFile(join(directory,'data/official-catalog.json'),'utf8')).tables.documents;
+ assert.equal(days.length,2);
+ assert.deepEqual(days.find(row=>row.id==='old'),overlay.tables.documents[0]);
+ assert.equal(days.find(row=>row.id!=='old').analyzed_at,null);
+ assert.equal(await readFile(join(directory,'data/analysis.json'),'utf8'),analysis);
+});
+
 test('index parsing omits XBRL taxonomy links and labels default.aspx from its parent path',()=>{
  const ir={...source,rules:[{containsAny:['10-k'],hrefContainsAny:['sec'],documentType:'filing',autoIngest:true}]};
  assert.equal(discoverHtml(ir,'https://example.com/news','<a href="/sec-filings/10-k/2026">EX-101.SCH - XBRL TAXONOMY EXTENSION SCHEMA</a>').length,0);

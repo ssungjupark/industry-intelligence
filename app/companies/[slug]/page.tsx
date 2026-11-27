@@ -7,6 +7,7 @@ import { CompanyTable } from '@/components/product/company-table';
 import { Implications } from '@/components/product/implications';
 import { SourceDocuments } from '@/components/product/source-documents';
 import { OfficialSources } from '@/components/product/official-sources';
+import { PublicationTimeline } from '@/components/product/publication-timeline';
 import { updated } from '@/components/product/format';
 
 export const dynamic = 'force-dynamic';
@@ -48,11 +49,12 @@ export default async function CompanyPage({ params, searchParams }: {
       {tab === 'implications'
         ? <Implications items={data.implications} changes={data.changes}/>
         : <>
+          <PublicationTimeline documents={data.documents} companies={[company]} title="최근 공식 발표" limit={3} showCompany={false}/>
           <CompanyBriefing slug={company.slug} documents={data.documents}/>
-          <OfficialSources entityId={company.id}/>
           {companyChanges.length > 0 && <ChangeFeed changes={companyChanges}/>}
           {data.members.some((member) => member.metric || member.catalyst) && <CompanyTable companies={data.members}/>}
           <SourceDocuments documents={data.documents} companies={data.companies} briefs={data.briefs}/>
+          <OfficialSources entityId={company.id}/>
         </>}
     </>
   );
