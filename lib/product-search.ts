@@ -9,14 +9,16 @@ function escapeRegex(value: string) {
 }
 
 const groupByAlias = new Map<string, number>();
-const groupMatchers = aliases.map((group, index) => group.map((value) => {
-  const alias = normalize(value);
-  groupByAlias.set(alias, index);
-  // A numeric product generation can follow a term, such as HBM4E.
-  if (/[가-힣]/.test(alias)) return (text: string) => text.includes(alias);
-  const pattern = new RegExp(`(?<![\\p{L}\\p{N}])${escapeRegex(alias)}(?!\\p{L})`, 'u');
-  return (text: string) => pattern.test(text);
-}));
+const groupMatchers = aliases.map(({ terms, indexedTerms = [] }, index) => {
+  for (const term of terms) groupByAlias.set(normalize(term), index);
+  return [...terms, ...indexedTerms].map((value) => {
+    const alias = normalize(value);
+    // A numeric product generation can follow a term, such as HBM4E.
+    if (/[가-힣]/.test(alias)) return (text: string) => text.includes(alias);
+    const pattern = new RegExp(`(?<![\\p{L}\\p{N}])${escapeRegex(alias)}(?!\\p{L})`, 'u');
+    return (text: string) => pattern.test(text);
+  });
+});
 
 const phrases = [...groupByAlias.keys()].sort((a, b) => b.length - a.length).map(escapeRegex);
 const queryPattern = new RegExp(`(?<![\\p{L}\\p{N}])(?:${phrases.join('|')})(?![\\p{L}\\p{N}])|[\\p{L}\\p{N}][\\p{L}\\p{N}._-]*`, 'gu');

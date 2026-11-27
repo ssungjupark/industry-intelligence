@@ -1,14 +1,14 @@
 [
-  ["NVIDIA", "엔비디아"],
-  ["Samsung Electronics", "삼성전자", "삼성 전자"],
-  ["SK hynix", "SK하이닉스", "SK 하이닉스", "하이닉스"],
-  ["Micron", "마이크론"],
-  ["TSMC", "티에스엠씨", "대만 반도체 제조"],
-  ["AMD", "에이엠디"],
-  ["Intel", "인텔"],
-  ["ASML", "에이에스엠엘"],
-  ["Qualcomm", "퀄컴"],
-  ["Broadcom", "브로드컴"],
-  ["HBM", "high bandwidth memory", "high-bandwidth memory", "고대역폭 메모리", "고대역폭메모리"],
-  ["semiconductor", "semiconductors", "반도체"]
+  {"terms": ["NVIDIA", "엔비디아"]},
+  {"terms": ["Samsung Electronics", "삼성전자", "삼성 전자"]},
+  {"terms": ["SK hynix", "SK하이닉스", "SK 하이닉스", "하이닉스"]},
+  {"terms": ["Micron", "마이크론"]},
+  {"terms": ["TSMC", "티에스엠씨", "대만 반도체 제조"]},
+  {"terms": ["AMD", "에이엠디"]},
+  {"terms": ["Intel", "인텔"]},
+  {"terms": ["ASML", "에이에스엠엘"]},
+  {"terms": ["Qualcomm", "퀄컴"]},
+  {"terms": ["Broadcom", "브로드컴"]},
+  {"terms": ["HBM", "high bandwidth memory", "high-bandwidth memory", "고대역폭 메모리", "고대역폭메모리"], "indexedTerms": ["iHBM"]},
+  {"terms": ["semiconductor", "semiconductors", "반도체"]}
 ]
