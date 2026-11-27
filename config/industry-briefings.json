@@ -8,8 +8,7 @@
         "date": "2026-11-18",
         "company": "삼성전기 · 엔비디아",
         "title": "삼성전기·엔비디아, 기판 협력을 MLCC까지 확대",
-        "summary": "두 회사는 10월 AI 칩용 ABF 패키지기판 공급 협약을 발표했습니다. 11월에는 협력을 적층세라믹콘덴서(MLCC)까지 넓혔고, 엔비디아는 세종·부산 생산시설의 추가 지원을 검토하고 있습니다.",
-        "why": "AI 가속기에 들어가는 기판과 전력 안정화 부품을 함께 다루는 협력입니다. 삼성전기는 2029년부터 본격적인 양산 체계를 갖출 계획이라고 밝혔습니다.",
+        "summary": "두 회사는 10월 AI 칩용 ABF 패키지기판 공급 협약을 발표했고, 11월 협력을 적층세라믹콘덴서(MLCC)까지 넓혔습니다. 엔비디아는 세종·부산 생산시설 추가 지원을 검토 중이며, 삼성전기는 2029년부터 본격적인 양산 체계를 갖출 계획입니다.",
         "sourceUrl": "https://samsungsem.com/kr/newsroom/news/view.do?id=10702",
         "sourceLabel": "삼성전기 11월 공식 발표",
         "references": [
@@ -24,7 +23,6 @@
         "company": "엔비디아",
         "title": "엔비디아 데이터센터 분기 매출, 전년 대비 110% 증가",
         "summary": "엔비디아는 10월 25일에 끝난 2027 회계연도 3분기 실적을 발표했습니다. 데이터센터 매출은 전분기와 전년 동기보다 모두 늘었습니다.",
-        "why": "데이터센터가 전체 매출의 대부분을 차지합니다. 분기별로 이 사업의 성장률을 비교하면 회사 전체 실적이 어느 사업에서 움직였는지 볼 수 있습니다.",
         "sourceUrl": "https://nvidianews.nvidia.com/news/nvidia-announces-financial-results-for-third-quarter-fiscal-2027",
         "sourceLabel": "엔비디아 공식 실적 발표",
         "comparisons": [
@@ -45,7 +43,6 @@
         "company": "SK하이닉스",
         "title": "SK하이닉스, HBM4 출하 확대와 장기 공급계약 공개",
         "summary": "SK하이닉스는 3분기에 HBM4 출하가 본격화됐고 서버용 DDR5 판매도 크게 늘었다고 밝혔습니다. 회사는 2027~2028년 총생산능력의 절반을 넘는 물량을 장기계약으로 확보했다고 발표했습니다.",
-        "why": "HBM4와 서버용 메모리 판매 확대가 실적에 반영되기 시작했습니다. 장기계약 규모는 앞으로의 생산능력 가운데 고객 수요가 확보된 비중을 보여줍니다.",
         "sourceUrl": "https://news.skhynix.com/en/q3-2026-business-results/",
         "sourceLabel": "SK하이닉스 공식 실적 발표",
         "comparisons": [
@@ -73,7 +70,6 @@
         "company": "AMD · 마이크로소프트",
         "title": "마이크로소프트, AMD 헬리오스 서버에서 AI 추론 검증",
         "summary": "AMD는 두 회사 엔지니어가 애저에서 AI 추론을 지원하기 위해 헬리오스 랙 단위 시스템의 작업 부하를 검증 중이라고 밝혔습니다.",
-        "why": "실제 클라우드 환경에서 쓸 수 있는 컴퓨팅 선택지가 늘어날지 볼 수 있는 단계입니다. 고객이 사용할 수 있는 시점은 별도 발표를 확인해야 합니다.",
         "sourceUrl": "https://newsroom.amd.com/news/microsoft-running-workload-validation-amd-helios-rackscale-solution/",
         "sourceLabel": "AMD 뉴스룸"
       },
@@ -82,7 +78,6 @@
         "company": "엔비디아",
         "title": "엔비디아, AI 칩 생산을 위한 부품·패키징 협력 확대",
         "summary": "엔비디아는 암코어 등 제조 파트너와 협력해 첨단 패키징과 핵심 부품의 생산 능력을 확대하는 계획을 발표했습니다.",
-        "why": "AI 서버 공급은 칩 설계뿐 아니라 칩을 조립하고 연결하는 생산 능력에도 달려 있습니다. 발표된 증설 일정이 실제로 지켜지는지가 관건입니다.",
         "sourceUrl": "https://nvidianews.nvidia.com/news/nvidia-expands-commitments-with-supply-chain-partners-to-support-ai-infrastructure-buildout",
         "sourceLabel": "엔비디아 뉴스룸"
       },
@@ -91,7 +86,6 @@
         "company": "아리스타 네트웍스",
         "title": "아리스타, 여러 곳에서 AI 추론을 나눠 처리하는 네트워크 제품 확대",
         "summary": "아리스타는 여러 AI 시스템이 요청을 나눠 처리할 때 전송 지연을 줄이기 위해 R4 네트워크 제품군을 확대했습니다.",
-        "why": "AI 서비스가 한 서버를 넘어 여러 장비를 오갈수록 네트워크 지연도 응답 속도를 좌우합니다.",
         "sourceUrl": "https://www.arista.com/en/company/news/press-release/25174-pr-20261117",
         "sourceLabel": "아리스타 공식 발표"
       }
@@ -107,7 +101,6 @@
         "company": "AWS",
         "title": "AWS, 콜롬비아 보고타에 가까운 클라우드 실행 거점 추가",
         "summary": "AWS는 주간 소식에서 보고타 로컬 존을 소개했습니다. 일부 클라우드 작업을 현지 사용자와 가까운 곳에서 실행할 수 있는 시설입니다.",
-        "why": "응답 시간이 중요한 서비스는 실제 이용자와 가까운 곳에서 일부 작업을 처리할 선택지가 늘어납니다.",
         "sourceUrl": "https://aws.amazon.com/blogs/aws/aws-weekly-roundup-local-zone-in-bogota-30-minute-lambda-timeout-and-more-november-24-2026/",
         "sourceLabel": "AWS 공식 블로그"
       },
@@ -116,7 +109,6 @@
         "company": "마이크로소프트",
         "title": "마이크로소프트, 사내 데이터를 연결하는 Microsoft IQ 발표",
         "summary": "마이크로소프트는 Ignite에서 Fabric, Foundry, Microsoft 365와 외부 데이터의 업무 맥락을 AI 에이전트에 연결하는 Microsoft IQ를 소개했습니다.",
-        "why": "사내 문서와 업무 데이터가 여러 서비스에 흩어져 있으면 AI가 회사 상황에 맞는 답을 내기 어렵습니다. 어떤 데이터까지 권한을 유지하며 연결할 수 있는지가 중요합니다.",
         "sourceUrl": "https://blogs.microsoft.com/blog/2026/11/17/ignite-2026-building-the-frontier-ecosystem/",
         "sourceLabel": "마이크로소프트 공식 블로그"
       },
@@ -125,7 +117,6 @@
         "company": "AWS",
         "title": "AWS, 칠레 첫 클라우드 리전을 일부 고객에 개방",
         "summary": "AWS는 칠레의 첫 클라우드 리전이 일부 고객에게 먼저 운영되고 있다고 밝혔습니다. 일반 고객을 대상으로 하는 정식 개방은 이후 단계입니다.",
-        "why": "칠레에서 데이터를 처리하려는 기업의 선택지가 넓어집니다. 정식 개방 시점과 제공 서비스의 범위를 확인할 필요가 있습니다.",
         "sourceUrl": "https://www.aboutamazon.com/news/aws/aws-south-america-chile-region-launch",
         "sourceLabel": "아마존 공식 발표"
       }
@@ -141,7 +132,6 @@
         "company": "삼성전자",
         "title": "삼성전자, 해상도에 따라 주사율을 바꾸는 게임 모니터 출시",
         "summary": "27인치 오디세이 G6는 HD에서 최대 1,100Hz, QHD에서 최대 600Hz를 지원한다고 삼성전자가 밝혔습니다.",
-        "why": "게임에 따라 화면의 선명도와 움직임의 부드러움 중 무엇을 우선할지 고를 수 있습니다. 실제 주사율은 연결된 장비와 게임에 따라 달라집니다.",
         "sourceUrl": "https://news.samsung.com/global/samsung-launches-odyssey-g6-the-worlds-first-1100hz-gaming-monitor",
         "sourceLabel": "삼성전자 뉴스룸"
       },
@@ -150,7 +140,6 @@
         "company": "애플",
         "title": "애플, 홈뷰 판매 시작",
         "summary": "애플은 엔터테인먼트와 스마트홈 기기 제어를 한 화면에 모은 홈뷰를 일부 지역에서 판매하기 시작했습니다.",
-        "why": "집 안에서 여러 기기로 나뉘던 기능을 전용 화면 하나로 묶는 시도입니다. 출시 지역과 지원하는 기기가 실제 사용 범위를 결정합니다.",
         "sourceUrl": "https://www.apple.com/newsroom/2026/11/apple-homeview-available-today/",
         "sourceLabel": "애플 뉴스룸"
       },
@@ -159,7 +148,6 @@
         "company": "삼성전자",
         "title": "삼성전자, 스마트 안경 12월 출시 예고",
         "summary": "삼성전자는 젠틀몬스터와 워비파커가 디자인에 참여한 스마트 안경의 12월 출시 계획을 공개했습니다.",
-        "why": "안경처럼 일상에서 착용하는 제품은 기능만큼 착용감과 구매 접근성이 중요합니다. 지역별 판매 일정과 가격은 후속 안내에서 볼 부분입니다.",
         "sourceUrl": "https://news.samsung.com/global/samsung-announces-december-release-for-intelligent-eyewear-bringing-a-smarter-way-to-see-the-world",
         "sourceLabel": "삼성전자 뉴스룸"
       }
@@ -175,7 +163,6 @@
         "company": "토요타",
         "title": "토요타 10월 세계 판매·생산, 모두 전년보다 감소",
         "summary": "렉서스를 포함한 토요타의 10월 세계 판매와 생산이 모두 줄었습니다. 세계 판매는 4개월 연속 전년 동월보다 적었습니다.",
-        "why": "생산 감소율이 판매 감소율보다 컸습니다. 다음 달에도 두 지표가 같은 방향으로 움직이는지 비교해 볼 수 있습니다.",
         "sourceUrl": "https://global.toyota/en/company/profile/production-sales-figures/202610.html",
         "sourceLabel": "토요타 공식 발표",
         "comparisons": [
@@ -202,7 +189,6 @@
         "company": "혼다",
         "title": "혼다, 연간 자동차 판매 전망을 23만 대 하향",
         "summary": "혼다는 2027년 3월에 끝나는 회계연도의 그룹 자동차 판매 전망을 339만 대에서 316만 대로 낮췄습니다. 아시아 전망을 23만 대 줄였고 북미 전망은 3만 대 높였습니다.",
-        "why": "그룹 자동차 판매 전망은 낮아졌지만 연결 영업이익 전망은 상향됐습니다. 판매량과 수익 전망이 서로 다른 방향으로 조정된 사례입니다.",
         "sourceUrl": "https://global.honda/en/investors/news/news20261110/main/0/link/FYE202703_2Q_financial_presentation_script_e.pdf",
         "sourceLabel": "혼다 실적 발표자료 PDF",
         "comparisons": [
@@ -223,7 +209,6 @@
         "company": "현대자동차 · 기아",
         "title": "10월 세계 판매, 현대차는 감소하고 기아는 증가",
         "summary": "현대차는 국내와 해외에서 모두 판매가 줄었고, 기아는 두 시장에서 모두 늘었습니다. 기아의 세계 판매에는 특수차 904대가 포함됩니다.",
-        "why": "같은 달에도 두 회사의 판매 흐름이 달랐습니다. 다음 달에는 신차 출시와 지역별 판매가 이 차이에 어떤 영향을 주는지 확인할 수 있습니다.",
         "sourceUrl": "https://www.hyundaimotorgroup.com/ko/news/hyundai-motor-company-october-2026-sales",
         "sourceLabel": "현대차 공식 판매 발표",
         "comparisons": [
@@ -257,7 +242,6 @@
         "company": "보잉",
         "title": "보잉, FAA 지원으로 항공기 소음과 결빙 안전 연구",
         "summary": "보잉은 미국 연방항공청(FAA)의 지원 프로그램에서 항공기 소음을 줄이고 결빙 환경에서의 안전 인증을 개선하는 두 연구 과제를 맡았다고 밝혔습니다.",
-        "why": "항공기 소음과 악천후 안전은 차세대 민항기에 필요한 인증과 공항 운영에 영향을 줍니다.",
         "sourceUrl": "https://www.boeing.com/features/2026/11/award-advances-work-on-quiet-thrust-reverser-icing-certification",
         "sourceLabel": "보잉 공식 발표"
       },
@@ -266,7 +250,6 @@
         "company": "RTX 콜린스 에어로스페이스",
         "title": "콜린스, 인도에 항공기 프로펠러 정비시설 착공",
         "summary": "RTX의 콜린스 에어로스페이스가 인도 벵갈루루에 항공기 프로펠러 정비·수리 시설을 짓기 시작했습니다.",
-        "why": "운항 지역 가까이에 정비 시설이 생기면 부품을 먼 곳으로 보내야 하는 경우가 줄어들 수 있습니다.",
         "sourceUrl": "https://www.rtx.com/news/news-center/2026/11/17/rtxs-collins-aerospace-breaks-ground-on-new-propeller-mro-facility-in-india",
         "sourceLabel": "RTX 공식 발표"
       },
@@ -275,7 +258,6 @@
         "company": "에어버스",
         "title": "미들 이스트 항공, 첫 A321XLR 인도",
         "summary": "에어버스는 레바논 미들 이스트 항공에 첫 A321XLR을 인도했다고 발표했습니다.",
-        "why": "장거리용 단일 통로 항공기는 큰 비행기로 채우기 어려운 노선에도 직항을 검토할 여지를 줍니다. 실제 투입 노선은 항공사 일정에서 확인할 수 있습니다.",
         "sourceUrl": "https://www.airbus.com/en/newsroom/press-releases/2026-11-middle-east-airlines-takes-delivery-of-its-first-airbus-a321xlr",
         "sourceLabel": "에어버스 공식 발표"
       }
@@ -291,7 +273,6 @@
         "company": "지멘스 에너지",
         "title": "지멘스 에너지, 전력망 장비 수주잔고 520억 유로",
         "summary": "지멘스 에너지는 2026 회계연도 결과에서 전력망 부문의 수주잔고가 520억 유로로 늘었다고 밝혔습니다.",
-        "why": "이미 확보한 계약 규모를 보여줍니다. 이 수요를 실제 납품으로 연결할 수 있는지는 생산 능력과 인도 일정에 달려 있습니다.",
         "sourceUrl": "https://assets.siemens-energy.com/dam/ac28618d-1e18-40ab-9ab6-b505011782e3/2026-11-17-Shareholder-Letter-Q4-FY2026_EN_Final-pdf_Original%20file.pdf",
         "sourceLabel": "지멘스 에너지 실적 자료"
       },
@@ -300,7 +281,6 @@
         "company": "GE 버노바",
         "title": "GE 버노바, 미국 변압기 공장 증설에 3,450만 달러 투자",
         "summary": "GE 버노바는 미국 루이지애나주 슈리브포트의 변압기 생산 시설을 확대한다는 계획을 발표했습니다.",
-        "why": "변압기는 전력망과 산업 시설을 연결하는 핵심 장비입니다. 증설이 실제 생산으로 이어지는 시점이 중요합니다.",
         "sourceUrl": "https://www.gevernova.com/news/press-releases/ge-vernova-invest-345-million-shreveport-facility-expansion-meet-growing-grid",
         "sourceLabel": "GE 버노바 공식 발표"
       },
@@ -309,7 +289,6 @@
         "company": "GE 버노바",
         "title": "인도 전력공사, 6GW 송전 사업에 GE 버노바 선정",
         "summary": "GE 버노바는 인도에서 6기가와트 규모의 초고압 직류 송전망을 공급할 사업자로 선정됐다고 발표했습니다.",
-        "why": "발전소를 늘려도 전기를 수요지까지 보낼 설비가 필요합니다. 이 사업은 재생에너지 발전 지역에서 전기를 보내기 위한 계획입니다.",
         "sourceUrl": "https://www.gevernova.com/news/print/pdf/node/144201",
         "sourceLabel": "GE 버노바 공식 발표"
       }
@@ -325,7 +304,6 @@
         "company": "에니",
         "title": "에니, 카자흐스탄 혼합 발전단지의 가스 발전소 가동",
         "summary": "에니는 망기스타우의 120MW 가스 발전소가 완전히 가동 중이라고 발표했습니다. 태양광은 이미 가동 중이고 풍력은 다음 단계로 제시됐습니다.",
-        "why": "가스·태양광·풍력을 한 사업에 묶는 사례입니다. 남은 풍력 설비가 언제 가동되는지에 따라 발전 구성도 달라집니다.",
         "sourceUrl": "https://www.eni.com/content/dam/enicom/documents/press-release/migrated/2026-it/11/cs-eni-annuncia-servizio-centrale-elettrica-mangystau.pdf",
         "sourceLabel": "에니 공식 발표"
       },
@@ -334,7 +312,6 @@
         "company": "BP",
         "title": "BP, 노르웨이 석유기업 아커BP 지분 5% 매각 공시",
         "summary": "BP는 미국 증권거래위원회에 제출한 공시에서 아커BP 지분 5%를 매각했다고 밝혔습니다.",
-        "why": "아커BP에 대한 BP의 자본 노출이 줄었습니다. 생산량 변화와 지분 변화는 별도로 확인할 필요가 있습니다.",
         "sourceUrl": "https://www.sec.gov/Archives/edgar/data/313807/000165495426009536/a9499b.htm",
         "sourceLabel": "SEC 공시"
       },
@@ -343,7 +320,6 @@
         "company": "에니",
         "title": "에니, 모잠비크 해상 LNG 사업의 시추 시작",
         "summary": "에니와 파트너들은 모잠비크 코럴 노스 부유식 LNG 사업에 필요한 시추를 시작했다고 밝혔습니다.",
-        "why": "추가 LNG 공급을 위한 준비 단계입니다. 실제 공급에 언제 기여할지는 설비 설치와 첫 생산 일정에 달려 있습니다.",
         "sourceUrl": "https://www.eni.com/en-IT/media/news/2026/11/eni-announces-begining-drilling-campaign-coral-nrth-flng-project.html",
         "sourceLabel": "에니 공식 발표"
       }
@@ -359,7 +335,6 @@
         "company": "BHP",
         "title": "BHP, 남호주 구리 생산 확대 계획 공개",
         "summary": "BHP는 남호주 현장 설명 자료에서 2035년 연간 약 50만 톤의 구리 생산을 목표로 제시했습니다.",
-        "why": "구리는 전력망과 전기 설비에 쓰입니다. 이 수치는 현재 생산량이 아니라 앞으로의 목표이며, 투자와 인허가 진행을 살펴야 합니다.",
         "sourceUrl": "https://www.bhp.com/-/media/documents/media/reports-and-presentations/2026/261123_bhpcoppersasite_tour.pdf",
         "sourceLabel": "BHP 현장 설명 자료"
       },
@@ -368,7 +343,6 @@
         "company": "리오 틴토",
         "title": "리오 틴토, 오유톨고이 지하 구리 광산 운영 단계적 재개",
         "summary": "리오 틴토는 몽골 오유톨고이 광산에서 지진성 진동 뒤 안전 점검을 마치고 지하 작업을 단계적으로 재개한다고 밝혔습니다.",
-        "why": "운영 재개는 생산 정상화의 한 단계입니다. 전체 생산이 언제 정상 수준으로 돌아오는지는 후속 생산 자료에서 확인할 수 있습니다.",
         "sourceUrl": "https://www.riotinto.com/en/news/releases/2026/update-on-oyu-tolgoi-seismic-event",
         "sourceLabel": "리오 틴토 공식 발표"
       },
@@ -377,7 +351,6 @@
         "company": "글렌코어",
         "title": "글렌코어, 페루 구리 광산 확장 사업의 토지 접근권 확보",
         "summary": "글렌코어는 페루 안타파카이 광산의 코로코우아이코 사업에 필요한 토지 접근권을 확보했다고 발표했습니다.",
-        "why": "기존 광산의 운영 기간과 구리 생산을 늘리기 위한 단계입니다. 접근권 확보 뒤에도 사업 승인과 공사 일정이 남아 있습니다.",
         "sourceUrl": "https://www.glencore.com/media-and-insights/news/glencore-achieves-land-access-for-coroccohuayco-project",
         "sourceLabel": "글렌코어 공식 발표"
       }
@@ -393,7 +366,6 @@
         "company": "존슨앤드존슨",
         "title": "존슨앤드존슨, 건선성 관절염 치료제의 4상 결과 발표",
         "summary": "회사는 트렘피어를 평가한 4상 시험에서 위약군과 비교해 질환 활성도 지표가 개선됐다고 발표했습니다. MRI로 평가한 염증 결과도 공개했습니다.",
-        "why": "증상 평가와 영상 지표가 함께 발표됐습니다. 개별 환자의 치료 효과를 판단하려면 시험 대상과 평가 시점을 함께 확인해야 합니다.",
         "sourceUrl": "https://www.jnj.com/media-center/press-releases/johnson-johnson-data-in-psoriatic-arthritis-psa-shows-tremfya-guselkumab-is-the-only-advanced-therapy-to-demonstrate-mri-confirmed-improvements-in-spinal-pain-and-stiffness",
         "sourceLabel": "존슨앤드존슨 공식 발표"
       },
@@ -402,7 +374,6 @@
         "company": "존슨앤드존슨",
         "title": "존슨앤드존슨, 수술 로봇 오타바 첫 상업 도입 병원 발표",
         "summary": "회사는 미국 휴스턴의 메모리얼 허먼 텍사스 메디컬 센터가 초기 상업 프로그램에서 수술 로봇 오타바를 처음 도입할 병원이라고 밝혔습니다.",
-        "why": "미국 허가 이후 첫 도입 병원이 정해졌습니다. 실제 설치와 이후 다른 병원의 도입 여부를 지켜볼 만합니다.",
         "sourceUrl": "https://www.jnj.com/media-center/press-releases/johnson-johnson-announces-first-commercial-installation-of-the-ottava-robotic-surgical-system-at-memorial-hermann-health-system",
         "sourceLabel": "존슨앤드존슨 공식 발표"
       },
@@ -411,7 +382,6 @@
         "company": "아스트라제네카",
         "title": "아스트라제네카, 방광암 병용요법 미국 승인 공시",
         "summary": "아스트라제네카는 임핀지와 엔포투맙 베도틴 병용요법이 미국에서 특정 근육침습성 방광암에 승인됐다고 공시했습니다.",
-        "why": "승인 범위는 공시에 명시된 환자군과 치료 조건에 한정됩니다. 방광암 치료 시장을 볼 때 적응증 범위를 구분하는 것이 중요합니다.",
         "sourceUrl": "https://www.sec.gov/Archives/edgar/data/901832/000165495426009811/a2426d.htm",
         "sourceLabel": "SEC 공시"
       }
@@ -427,7 +397,6 @@
         "company": "리치몬트",
         "title": "리치몬트 상반기 주얼리 매출 18% 증가",
         "summary": "리치몬트는 9월 말까지의 6개월간 주얼리 부문 매출이 보고 환율 기준 전년 동기보다 18% 늘었다고 발표했습니다.",
-        "why": "럭셔리 소비를 볼 때 주얼리와 시계가 같은 방향으로 움직인다고 가정하기 어렵습니다. 부문별 성장률을 함께 보면 변화가 더 분명합니다.",
         "sourceUrl": "https://www.richemont.com/media/ztpd2qqu/ad-hoc-announcement-pursuant-to-art-53-lr-fy27-interim-results-en.pdf",
         "sourceLabel": "리치몬트 반기 실적"
       },
@@ -436,7 +405,6 @@
         "company": "에르메스",
         "title": "에르메스, 스위스 제네바 매장 확장",
         "summary": "에르메스는 제네바 매장을 리뉴얼하고 확장했다고 발표했습니다.",
-        "why": "기존 도시에 더 넓은 판매 공간을 확보한 사례입니다. 매장 확장만으로 지역 매출이 늘었다고 판단할 수는 없습니다.",
         "sourceUrl": "https://finance.hermes.com/en/publications/hermes-unveils-its-renovated-and-expanded-store-geneva-switzerland-invitation-timeless",
         "sourceLabel": "에르메스 공식 발표"
       },
@@ -445,7 +413,6 @@
         "company": "유니레버",
         "title": "유니레버, 생활·개인용품 중심 전략 재확인",
         "summary": "유니레버는 투자자 행사에서 생활용품과 개인 관리 제품에 초점을 맞춘 사업 구성과 운영 방향을 설명했습니다.",
-        "why": "기존 제품군에 집중하려는 회사의 전략입니다. 이후 어느 브랜드와 판매 채널에 실제 투자가 늘어나는지가 관건입니다.",
         "sourceUrl": "https://www.unilever.com/investors/results-events/results-events-webcasts/unilever-investor-event-2026/",
         "sourceLabel": "유니레버 투자자 자료"
       }
@@ -461,7 +428,6 @@
         "company": "비자",
         "title": "비자, AI 결제 검증을 가맹점·결제 처리 업체로 확대",
         "summary": "비자는 카드 발급사 중심으로 운영해 온 AI 결제 검증 프로그램을 가맹점, 결제 서비스 업체, 매입사로 넓혔습니다. 승인된 AI가 시작한 거래를 기존 결제망에서 식별하고 처리하는 방식이 시험 대상입니다.",
-        "why": "가맹점과 결제 처리 업체도 시험에 참여하게 됐습니다. 실제 서비스에 도입되는 지역과 적용 범위는 후속 발표에서 확인할 수 있습니다.",
         "sourceUrl": "https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.22991.html",
         "sourceLabel": "비자 공식 정정 발표",
         "comparisons": [
@@ -482,7 +448,6 @@
         "company": "KB금융",
         "title": "KB금융 순수수료이익, 분기는 감소하고 누적은 증가",
         "summary": "KB금융의 3분기 순수수료이익은 2분기보다 29.7% 줄었습니다. 1~9월 누적액은 전년 같은 기간보다 38.5% 늘었습니다.",
-        "why": "직전 분기와 비교한 둔화와 연간 누적 성장세가 함께 나타났습니다. 기간을 나눠 보면 수수료 수익의 흐름을 더 정확히 볼 수 있습니다.",
         "sourceUrl": "https://www.kbfg.com/common/jsp/fileDownUtil.jsp?filepath=/data/ir_presentation/2026_3QPT_KOR.pdf",
         "sourceLabel": "KB금융 공식 실적자료 PDF",
         "comparisons": [
@@ -503,7 +468,6 @@
         "company": "마스터카드",
         "title": "마스터카드 3분기 국경 간 결제액 11% 증가",
         "summary": "마스터카드의 3분기 순매출이 전년 동기보다 14% 늘었습니다. 회사가 발표한 국경 간 결제액 증가율은 현지 통화 기준 11%였습니다.",
-        "why": "국경 간 결제액과 결제망 매출을 같이 보면 거래 증가가 결제망 부문 실적에 어떻게 나타났는지 확인할 수 있습니다.",
         "sourceUrl": "https://investor.mastercard.com/files/content_files/3Q26-Mastercard-Earnings-Release.pdf",
         "sourceLabel": "마스터카드 공식 실적 발표 PDF",
         "comparisons": [

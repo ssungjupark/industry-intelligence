@@ -10,7 +10,6 @@ type Change = {
   company: string;
   title: string;
   summary: string;
-  why: string;
   sourceUrl: string;
   sourceLabel: string;
   comparisons?: { label: string; value: string; baseline: string }[];
@@ -64,7 +63,6 @@ export function IndustryBriefing({ industrySlug, documents = [] }: { industrySlu
                     ))}
                   </dl>
                 )}
-                <p><strong>왜 중요한가</strong> {item.why}</p>
                 <div className="briefing-references">
                   {[{ url: href, label: item.sourceLabel }, ...(item.references ?? [])].map(reference => {
                     const url = sourceLink(reference.url);

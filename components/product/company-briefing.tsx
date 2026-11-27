@@ -18,7 +18,6 @@ export function CompanyBriefing({ slug, documents }: { slug: string; documents: 
       <article>
         <h3>{brief.title}</h3>
         <p>{brief.summary}</p>
-        <p><strong>볼 만한 점</strong> {brief.significance}</p>
         <div className="company-briefing-links">
           {document && <Link href={`/documents/${document.id}`}>자료 읽기 →</Link>}
           <a href={url} target="_blank" rel="noopener noreferrer">공식 원문 ↗</a>
