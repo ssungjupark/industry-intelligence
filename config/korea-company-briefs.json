@@ -1,0 +1,74 @@
+[
+  {
+    "companySlug": "samsung-electronics",
+    "date": "2026-10-29",
+    "title": "메모리 사업이 삼성전자 3분기 실적을 끌어올림",
+    "summary": "삼성전자는 2026년 3분기 연결 매출 195조 3,000억 원과 영업이익 107조 4,000억 원을 발표했습니다. 회사는 메모리 사업의 최대 실적을 주요 배경으로 꼽았습니다.",
+    "significance": "메모리와 파운드리의 실적을 따로 보면 어떤 사업이 전체 성장을 이끌었는지 확인할 수 있습니다.",
+    "sourceUrl": "https://news.samsung.com/kr/%EC%82%BC%EC%84%B1%EC%A0%84%EC%9E%90-2026%EB%85%84-3%EB%B6%84%EA%B8%B0-%EC%8B%A4%EC%A0%81-%EB%B0%9C%ED%91%9C"
+  },
+  {
+    "companySlug": "sk-hynix",
+    "date": "2026-10-28",
+    "title": "SK하이닉스 3분기 매출 100조 원 돌파",
+    "summary": "SK하이닉스는 2026년 3분기 잠정 매출이 104조 6,155억 원으로 집계됐다고 밝혔습니다. 회사는 AI용 메모리 수요와 HBM4 판매를 주요 배경으로 설명했습니다.",
+    "significance": "다음 분기에는 HBM4와 기존 HBM3E의 매출 구성이 어떻게 바뀌는지가 관건입니다.",
+    "sourceUrl": "https://news.skhynix.com/en/q3-2026-business-results/"
+  },
+  {
+    "companySlug": "hyundai-motor",
+    "date": "2026-11-02",
+    "title": "현대차 10월 글로벌 판매 6.3% 감소",
+    "summary": "현대차는 10월 전 세계에서 32만 9,773대를 판매했다고 발표했습니다. 전년 같은 달보다 국내는 8.9%, 해외는 5.9% 줄었습니다.",
+    "significance": "글로벌 판매 총량과 함께 국내·해외 흐름을 보면 어떤 시장에서 감소 폭이 더 컸는지 알 수 있습니다.",
+    "sourceUrl": "https://www.hyundaimotorgroup.com/ko/news/hyundai-motor-company-october-2026-sales"
+  },
+  {
+    "companySlug": "lg-electronics",
+    "date": "2026-10-28",
+    "title": "LG전자, 구독 사업 매출 8.6% 증가 발표",
+    "summary": "LG전자는 2026년 3분기에 제품 구독과 유지관리 서비스를 포함한 구독 사업 매출이 전년 같은 기간보다 8.6% 증가했다고 밝혔습니다.",
+    "significance": "제품을 한 번 판매하는 방식 외에 구독과 유지관리가 어느 정도 매출을 만드는지 볼 수 있는 지표입니다.",
+    "sourceUrl": "https://www.lg.com/my/about-lg/press-and-media/lg-electronics-releases-third-quarter-2026-financial-results/"
+  },
+  {
+    "companySlug": "kia",
+    "date": "2026-11-02",
+    "title": "기아 10월 글로벌 도매 판매 10.3% 증가",
+    "summary": "기아는 10월 글로벌 도매 판매가 29만 1,219대로 집계됐다고 밝혔습니다. 지난해 같은 달보다 10.3% 늘었습니다.",
+    "significance": "현대차와 같은 달의 판매 발표를 읽을 때 집계 방식과 국내·해외 범위를 함께 확인하면 비교가 쉬워집니다.",
+    "sourceUrl": "https://www.hyundaimotorgroup.com/ko/news/kia-october-2026-sales"
+  },
+  {
+    "companySlug": "samsung-electro-mechanics",
+    "date": "2026-11-18",
+    "title": "삼성전기와 엔비디아, AI 반도체 기판 협력 확대",
+    "summary": "삼성전기는 엔비디아와 AI 인프라에 필요한 반도체 패키지기판 공급 협력을 강화한다고 밝혔습니다.",
+    "significance": "패키지기판은 고성능 칩을 다른 부품과 연결합니다. AI 칩 생산이 확대될 때 기판 공급에도 수요가 생기는 이유입니다.",
+    "sourceUrl": "https://samsungsem.com/kr/newsroom/news/view.do?id=10702"
+  },
+  {
+    "companySlug": "ls-electric",
+    "date": "2026-11-05",
+    "title": "LS ELECTRIC, 한전과 전력설비 진단 기술이전 계약",
+    "summary": "LS ELECTRIC은 한국전력과 전력설비 예방진단 솔루션의 기술이전 계약을 맺었다고 밝혔습니다.",
+    "significance": "장비의 고장 징후를 미리 확인하고 유지보수 시점을 정하는 데 쓰이는 분야입니다. 실제 적용 범위는 후속 발표에서 확인할 수 있습니다.",
+    "sourceUrl": "https://www.ls-electric.com/ko/pr/news/view/401484"
+  },
+  {
+    "companySlug": "samsung-biologics",
+    "date": "2026-11-16",
+    "title": "삼성바이오로직스, 약 2조 7,000억 원 유상증자 완료",
+    "summary": "삼성바이오로직스는 폴리펩타이드그룹 인수에 필요한 자금을 마련하기 위해 진행한 유상증자를 마쳤다고 발표했습니다.",
+    "significance": "이번 발표가 확인한 것은 자금 조달입니다. 인수 거래의 최종 종결은 후속 발표에서 따로 확인할 수 있습니다.",
+    "sourceUrl": "https://samsungbiologics.com/kr/media/company-news/samsung-biologics-successfully-completes-2-7-trillion-krw-capital-raise"
+  },
+  {
+    "companySlug": "naver",
+    "date": "2026-11-12",
+    "title": "네이버 3분기 매출 10.7% 증가, 영업이익 감소",
+    "summary": "네이버는 2026년 3분기 매출 3조 4,724억 원, 영업이익 4,513억 원을 발표했습니다. 회사는 AI 투자 영향으로 영업이익이 줄었다고 설명했습니다.",
+    "significance": "매출이 늘어나는 속도와 AI 투자 비용이 이익에 미치는 영향을 함께 볼 수 있습니다.",
+    "sourceUrl": "https://navercorp.com/media/pressReleasesDetail?seq=10034879"
+  }
+]

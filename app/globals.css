@@ -85,6 +85,10 @@
   text-underline-offset: 3px;
 }
 .home-search-link { display: flex; flex-wrap: wrap; gap: 12px 24px; }
+.company-briefing { padding-bottom: 20px; }
+.company-briefing article { border-top: 1px solid var(--line); padding-top: 10px; }
+.company-briefing-links { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.table-controls select { padding: 7px 10px; border: 1px solid var(--line); background: #fff; color: var(--ink); }
 
 .home-page-heading { min-height: 0; margin-bottom: 22px; }
 .home-page-heading h1 { margin-top: 0; }
