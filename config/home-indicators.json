@@ -1,0 +1,29 @@
+[
+  {
+    "id": "semiconductor-sales",
+    "industrySlug": "semiconductor",
+    "period": "2026-09",
+    "publishedAt": "2026-11-03",
+    "value": 172.6,
+    "change": 7.9,
+    "sourceUrl": "https://www.semiconductors.org/global-semiconductor-sales-increase-24-1-from-q2-2026-to-q3-2026/"
+  },
+  {
+    "id": "eu-bev-share",
+    "industrySlug": "automotive",
+    "period": "2026-10",
+    "publishedAt": "2026-11-24",
+    "value": 23.4,
+    "change": 7,
+    "sourceUrl": "https://www.acea.auto/pc-registrations/new-car-registrations-5-4-in-october-2026-year-to-date-battery-electric-23-4-market-share/"
+  },
+  {
+    "id": "us-crude-stocks",
+    "industrySlug": "energy",
+    "period": "2026-11-20",
+    "publishedAt": "2026-11-25",
+    "value": 418906,
+    "change": 1109,
+    "sourceUrl": "https://www.eia.gov/dnav/pet/hist/LeafHandler.ashx?f=W&n=PET&s=WCESTUS1"
+  }
+]
