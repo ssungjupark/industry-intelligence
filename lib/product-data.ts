@@ -6,6 +6,7 @@ import { compareDocuments,eligibleDocument,isSynthetic,publicSignal,preferences,
 import { sourceLink } from "@/lib/source-link";
 import {acquisitionCounts} from './catalog-coverage';
 import {annotateDocumentRelevance,relevanceStatus} from './document-relevance';
+import dailyOfficialSources from '@/config/daily-official-sources.json';
 
 export type Industry={id:string;slug:string;name:string;metadata?:Meta};
 export type Company={id:string;slug:string;name:string;ticker:string|null;country:string|null;metadata?:Meta};
@@ -17,10 +18,11 @@ type EventLink={event_id:string;evidence_segment_id:string};
 export type Change=ProductSignal & {companies:string[];evidenceCount:number;updated:string};
 export type CompanySummary=Company & {recent:Change|null;metric:ProductMetric|null;catalyst:ProductEvent|null;latest:ProductDocument|null;updated:string|null};
 export type Implication={id:string;summary:string;questions:string[];next_checks:string[];sourceSignalIds:string[]};
-export type ProductData={configured:boolean;industries:Industry[];companies:Company[];members:CompanySummary[];changes:Change[];documents:ProductDocument[];briefs:DocumentBrief[];implications:Implication[];industry?:Industry;company?:Company;updated:string|null};
+export type ProductData={configured:boolean;industries:Industry[];companies:Company[];members:CompanySummary[];changes:Change[];documents:ProductDocument[];briefs:DocumentBrief[];implications:Implication[];industry?:Industry;company?:Company;updated:string|null;preferredPublicationIds?:string[]};
 
 export function companySlug(company:{slug?:string;name:string;id:string;metadata?:Meta}) {return company.slug || (typeof company.metadata?.slug==="string"?company.metadata.slug:company.name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")) || company.id;}
 const unique=(values:string[]) => [...new Set(values)];
+const dailySourceIds=new Set(Object.keys(dailyOfficialSources));
 export const productCatalog=cache(async () => {
   const [industries,entities,mappings]=await Promise.all([readRows<Industry>("industries"),readRows<Company>("entities",{entity_type:"company"}),readRows<Mapping>("entity_industries")]);
   return {industries:industries.sort((a,b) => a.name.localeCompare(b.name)),companies:entities.filter((e) => !isSynthetic(e)).map((e) => ({...e,slug:companySlug(e)})).sort((a,b) => a.name.localeCompare(b.name)),mappings};
@@ -45,7 +47,7 @@ export const productData=cache(async (industrySlug?:string,entitySlug?:string):P
   const since=new Date(Date.now()-120*86400000).toISOString().slice(0,10);
   const today=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
   const [documents,entitySignals,industrySignals,metrics,events,facts]=await Promise.all([
-    readRows<ProductDocument>("documents",{},entityScope),
+    readRows<ProductDocument & {source_registry_id?:string|null}>("documents",{},entityScope),
     readRows<ProductSignal>("signals",{signal_level:"entity"},entityScope,{column:"signal_date",value:since}),
     readRows<ProductSignal>("signals",{signal_level:"industry"},{column:"industry_id",ids:industryIds},{column:"signal_date",value:since}),
     readRows<ProductMetric>("metrics",{},entityScope),readRows<ProductEvent>("events",{},entityScope,{column:"event_date",value:today}),readRows<Fact>("claims",{},entityScope),
@@ -90,9 +92,10 @@ export const productData=cache(async (industrySlug?:string,entitySlug?:string):P
     const refs=implicationLinks.filter((l) => l.implication_id===item.id).map((l) => l.signal_id);return refs.length && refs.every(id=>changes.some(c=>c.id===id))?[{...item,sourceSignalIds:refs}]:[];
   });
   const productDocs=documents.filter(d=>ids.includes(d.entity_id)&&eligibleDocument(d)&&sourceLink(d.url)).map(d=>industry?annotateDocumentRelevance(d,industry.metadata):d);
+  const preferredPublicationIds=company?productDocs.filter(doc=>doc.source_registry_id&&dailySourceIds.has(doc.source_registry_id)).map(doc=>doc.id):undefined;
   const references=[...claimLinks.map(l=>({owner_id:l.claim_id,evidence_segment_id:l.evidence_segment_id})),...metricLinks.map(l=>({owner_id:l.metric_id,evidence_segment_id:l.evidence_segment_id})),...eventLinks.map(l=>({owner_id:l.event_id,evidence_segment_id:l.evidence_segment_id}))];
   const briefs=productDocs.map(d=>documentBrief(d,facts,metrics,events,evidence,references,today));
-  return {configured:productRepositoryConfigured(),industries:catalog.industries,companies:catalog.companies,members,changes,documents:productDocs.map(publicDocument),briefs,implications,industry,company,updated:[...changes.map((c) => c.updated),...documents.filter(eligibleDocument).map(d=>d.published_at || d.created_at)].sort().at(-1) || null};
+  return {configured:productRepositoryConfigured(),industries:catalog.industries,companies:catalog.companies,members,changes,documents:productDocs.map(publicDocument),briefs,implications,industry,company,preferredPublicationIds,updated:[...changes.map((c) => c.updated),...documents.filter(eligibleDocument).map(d=>d.published_at || d.created_at)].sort().at(-1) || null};
 });
 
 export async function evidenceDetail(kind:string,id:string) {

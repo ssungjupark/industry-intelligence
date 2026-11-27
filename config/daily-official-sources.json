@@ -1,0 +1,85 @@
+{
+  "samsung-electronics-korea-ir": {
+    "adapter": "rss",
+    "discoveryUrls": ["https://news.samsung.com/kr/feed"],
+    "rules": [
+      {"hrefContainsAny": ["/kr/"], "containsAny": ["분기 실적", "잠정실적"], "documentType": "earnings_release", "autoIngest": true},
+      {"hrefContainsAny": ["/kr/"], "containsAny": ["투자", "양산", "공급", "반도체", "파운드리", "HBM", "협력", "사장단 인사", "정기 임원 인사"], "excludesAny": ["[영상]", "[체험기]", "뉴스레터", "봉사"], "documentType": "other", "autoIngest": true}
+    ],
+    "config": {"titleSelector": ".single-title", "contentSelector": ".single_contents"}
+  },
+  "hyundai-motor-korea-ir": {
+    "discoveryUrls": ["https://www.hyundaimotorgroup.com/ko/tag/business-performance"],
+    "rules": [
+      {"hrefContainsAny": ["/ko/news/hyundai-motor-company-"], "containsAny": ["경영실적", "earnings"], "documentType": "earnings_release", "autoIngest": true},
+      {"hrefContainsAny": ["/ko/news/hyundai-motor-company-"], "containsAny": ["대 판매"], "documentType": "other", "autoIngest": true}
+    ],
+    "config": {
+      "linkSelector": "article a[href^='/ko/news/hyundai-motor-company-']",
+      "linkTitleSelector": ".cardList__title",
+      "titleSelector": "h1.head-title",
+      "contentSelector": ".page-detail__contents",
+      "excludeContentSelector": ".component-ai-summary, .component-tagLinks, .component-summary-list"
+    }
+  },
+  "kia-korea-ir": {
+    "discoveryUrls": ["https://www.hyundaimotorgroup.com/ko/tag/business-performance"],
+    "rules": [
+      {"hrefContainsAny": ["/ko/news/kia-"], "containsAny": ["경영실적", "earnings"], "documentType": "earnings_release", "autoIngest": true},
+      {"hrefContainsAny": ["/ko/news/kia-"], "containsAny": ["대 판매"], "documentType": "other", "autoIngest": true}
+    ],
+    "config": {
+      "linkSelector": "article a[href^='/ko/news/kia-']",
+      "linkTitleSelector": ".cardList__title",
+      "titleSelector": "h1.head-title",
+      "contentSelector": ".page-detail__contents",
+      "excludeContentSelector": ".component-ai-summary, .component-tagLinks, .component-summary-list"
+    }
+  },
+  "samsung-electro-mechanics-korea-ir": {
+    "discoveryUrls": ["https://samsungsem.com/kr/newsroom/news/overview.do"],
+    "rules": [
+      {"hrefContainsAny": ["/kr/newsroom/news/view.do?id="], "containsAny": ["경영실적", "분기 실적"], "documentType": "earnings_release", "autoIngest": true},
+      {"hrefContainsAny": ["/kr/newsroom/news/view.do?id="], "containsAny": ["공급", "투자", "협력", "양산", "출시", "MLCC", "패키지기판"], "excludesAny": ["현장방문 소통포럼", "해커톤", "기능올림픽"], "documentType": "other", "autoIngest": true}
+    ],
+    "config": {
+      "linkSelector": "a[href^='/kr/newsroom/news/view.do?id=']",
+      "linkTitleSelector": "h4",
+      "linkDateSelector": ".detail span:last-child",
+      "contentSelector": "#gtagId",
+      "titleSelector": "h3.tit",
+      "dateSelector": ".tit_top .date"
+    }
+  },
+  "samsung-biologics-korea-ir": {
+    "discoveryUrls": ["https://samsungbiologics.com/kr/media/newsroom"],
+    "rules": [
+      {"hrefContainsAny": ["/kr/media/company-news/"], "containsAny": ["분기 실적", "financial-results"], "documentType": "earnings_release", "autoIngest": true},
+      {"hrefContainsAny": ["/kr/media/company-news/"], "containsAny": ["인수", "자금 조달", "투자", "증설", "계약", "파트너십", "유상증자", "출시", "생산", "CDMO"], "documentType": "other", "autoIngest": true}
+    ],
+    "config": {
+      "linkSelector": "._latestNews .txt-box:has(.category:contains('Press Releases')) a.tit",
+      "linkContainer": ".txt-box",
+      "linkTitleSelector": "a.tit",
+      "linkDateSelector": ".category span",
+      "contentSelector": ".press_release_view",
+      "titleSelector": ".press_release_view h1"
+    }
+  },
+  "naver-korea-ir": {
+    "discoveryUrls": ["https://navercorp.com/media/pressReleases"],
+    "rules": [
+      {"hrefContainsAny": ["/media/pressReleasesDetail?seq="], "containsAny": ["분기 실적", "분기 매출"], "documentType": "earnings_release", "autoIngest": true},
+      {"hrefContainsAny": ["/media/pressReleasesDetail?seq="], "containsAny": ["인수", "계약", "출자", "투자", "데이터센터", "AI", "클라우드", "협력"], "excludesAny": ["경진대회", "공모전", "페스티벌", "인재 양성", "수상", "시상식", "청소년", "추천 강화"], "documentType": "other", "autoIngest": true}
+    ],
+    "config": {
+      "linkSelector": "a.title[href^='/media/pressReleasesDetail?seq=']",
+      "linkContainer": ".card-contents__txt",
+      "linkTitleSelector": "a.title",
+      "linkDateSelector": ".date",
+      "contentSelector": ".board-view-data",
+      "titleSelector": ".media-press-detail__title",
+      "dateSelector": ".board-view-header .date"
+    }
+  }
+}

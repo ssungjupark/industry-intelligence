@@ -1,4 +1,4 @@
-import Link from "@/lib/site-link";
+import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { productData } from '@/lib/product-data';
 import { ChangeFeed } from '@/components/product/changes';
@@ -49,7 +49,7 @@ export default async function CompanyPage({ params, searchParams }: {
       {tab === 'implications'
         ? <Implications items={data.implications} changes={data.changes}/>
         : <>
-          <PublicationTimeline documents={data.documents} companies={[company]} title="최근 공식 발표" limit={3} showCompany={false}/>
+          <PublicationTimeline documents={data.documents} companies={[company]} title="최근 공식 발표" limit={3} showCompany={false} preferredIds={data.preferredPublicationIds}/>
           <CompanyBriefing slug={company.slug} documents={data.documents}/>
           {companyChanges.length > 0 && <ChangeFeed changes={companyChanges}/>}
           {data.members.some((member) => member.metric || member.catalyst) && <CompanyTable companies={data.members}/>}

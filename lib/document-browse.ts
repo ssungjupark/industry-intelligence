@@ -18,7 +18,7 @@ export function browseDocuments(documents:ProductDocument[],companies:SearchComp
   return matches(d.title,d.headline,d.summary,company?.name,company?.ticker,company?.metadata?.label,documentTypeLabel(d.document_type))&&(!filters.company||d.entity_id===filters.company)&&(!filters.type||(d.document_type||'other')===filters.type)&&(!filters.readable||!!d.parsed_at)&&(!filters.relevantOnly||relevanceStatus(d)==='relevant')&&(!filters.from||!!date&&date>=filters.from)&&(!filters.to||!!date&&date<=filters.to);
  }).sort(compareDocuments);
 }
-export function recentPublications(documents:ProductDocument[],companies:SearchCompany[],limit=8){
+export function recentPublications(documents:ProductDocument[],companies:SearchCompany[],limit=8,preferredIds:string[]=[]){
  const classified=documents.some(d=>d.metadata?.industryRelevance);
  // Undated documents remain searchable below; collection time is never a release date.
  const dated=browseDocuments(documents,companies,{relevantOnly:classified}).filter(d=>!!d.published_at);
@@ -27,7 +27,11 @@ export function recentPublications(documents:ProductDocument[],companies:SearchC
  const notice=/(?:sets? (?:a )?conference call|to host (?:a )?(?:technology )?webinar|will report (?:its )?(?:quarterly|financial|fiscal)|announces? (?:the )?date of|invitation to (?:a )?(?:conference|webcast))/i;
  const cutoff=new Date(new Date(dated[0].published_at!).getTime()-45*86400000).toISOString();
  const current=dated.filter(d=>d.published_at!>=cutoff),older=dated.filter(d=>d.published_at!<cutoff);
- const ordered=[...current.filter(d=>!notice.test(d.title)),...current.filter(d=>notice.test(d.title)),...older.filter(d=>!notice.test(d.title)),...older.filter(d=>notice.test(d.title))];
+ const featured=new Set(preferredIds);
+ const priorityCutoff=new Date(new Date(dated[0].published_at!).getTime()-14*86400000).toISOString();
+ const priority=(doc:ProductDocument)=>Number(featured.has(doc.id)&&doc.published_at!>=priorityCutoff);
+ const releases=current.filter(d=>!notice.test(d.title)).sort((a,b)=>priority(b)-priority(a));
+ const ordered=[...releases,...current.filter(d=>notice.test(d.title)),...older.filter(d=>!notice.test(d.title)),...older.filter(d=>notice.test(d.title))];
  const selected:ProductDocument[]=[],counts=new Map<string,number>();
  for(const row of ordered){if((counts.get(row.entity_id)||0)>=2)continue;selected.push(row);counts.set(row.entity_id,(counts.get(row.entity_id)||0)+1);if(selected.length>=limit)return selected;}
  for(const row of ordered){if(selected.some(d=>d.id===row.id))continue;selected.push(row);if(selected.length>=limit)break;}

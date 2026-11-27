@@ -1,11 +1,11 @@
-import Link from "@/lib/site-link";
+import Link from 'next/link';
 import type {Company} from '@/lib/product-data';
 import type {ProductDocument} from '@/lib/product-selection';
 import {recentPublications,documentTypeLabel,publicationDay} from '@/lib/document-browse';
 import {displayDocumentTitle} from '@/lib/document-relevance';
 
-export function PublicationTimeline({documents,companies,title='주요 공식 발표',archiveHref='#official-documents',limit,showCompany=true}:{documents:ProductDocument[];companies:Company[];title?:string;archiveHref?:string;limit?:number;showCompany?:boolean}){
- const rows=recentPublications(documents,companies,limit);
+export function PublicationTimeline({documents,companies,title='주요 공식 발표',archiveHref='#official-documents',limit,showCompany=true,preferredIds}:{documents:ProductDocument[];companies:Company[];title?:string;archiveHref?:string;limit?:number;showCompany?:boolean;preferredIds?:string[]}){
+ const rows=recentPublications(documents,companies,limit,preferredIds);
  if(!rows.length)return null;
  const latest=documents.map(d=>d.published_at).filter((value):value is string=>!!value).sort().at(-1);
  return <section className="product-section publication-section"><div className="section-title"><h2>{title}</h2>{showCompany&&latest&&<span className="publication-latest">최신 발표 {publicationDay(latest)}</span>}<Link href={archiveHref}>전체 자료 ↗</Link></div><div className={showCompany?'publication-timeline':'publication-timeline publication-timeline-company'}>{rows.map(d=>{
