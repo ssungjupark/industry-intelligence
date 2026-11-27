@@ -119,6 +119,24 @@ export function discoverRss(source,feedUrl,xml){
  });
  return [...new Map(results.map(row=>[row.url,row])).values()];
 }
+export function discoverXmlList(source,pageUrl,xml){
+ const {root,idField,titleField,dateField,documentUrl,documentParam}=source.config.xmlList;
+ const $=load(xml,{xmlMode:true});
+ const list=$(root);
+ if(list.length!==1)throw Error('Official XML list missing');
+ const values=field=>list.children(field).map((_,element)=>clean($(element).text())).get();
+ const ids=values(idField),titles=values(titleField),dates=values(dateField);
+ if(!ids.length||ids.length!==titles.length||ids.length!==dates.length)throw Error('Official XML list columns do not match');
+ const results=[];
+ for(const [index,id] of ids.entries()){
+  if(!/^\d{1,20}$/.test(id)||!titles[index])continue;
+  const url=officialUrl(documentUrl,source,pageUrl);
+  url.searchParams.set(documentParam,id);
+  const row=discovered(source,url,titles[index],pageUrl,dates[index],index);
+  if(row)results.push(row);
+ }
+ return [...new Map(results.map(row=>[row.url,row])).values()];
+}
 export function secFilingDocument(indexUrl,html){
  const $=load(html),files=[];
  $('table.tableFile tr').each((_,row)=>{
@@ -148,7 +166,8 @@ export async function discoverSource(source,fetcher){
      if(results.length>=3)break;
     }catch(error){console.warn(`SEC filing ${filing.url}: ${String(error)}`);}
    }
-  }else results.push(...(source.adapter==='rss'?discoverRss(source,fetched.url.href,content):discoverHtml(source,fetched.url.href,content)));
+  }else if(source.adapter==='xml_list')results.push(...discoverXmlList(source,fetched.url.href,content));
+  else results.push(...(source.adapter==='rss'?discoverRss(source,fetched.url.href,content):discoverHtml(source,fetched.url.href,content)));
   if(source.adapter==='html_links'&&index<source.discoveryUrls.length&&source.config?.followLinkSelector){
    const $=load(content);$(source.config.followLinkSelector).each((_,element)=>{
     if(urls.length>=source.discoveryUrls.length+followLimit)return;
@@ -225,7 +244,7 @@ export async function parseOfficial(fetched,source,title){
  return {rawText,reading,pages:null,title:source.adapter==='sec_filings'?secHeadline(reading,source.entityName,pageTitle):pageTitle,publishedAt};
 }
 export function selectSources(registry,day=new Date(),batch=12){
- const active=registry.filter(source=>source.enabled!==false&&source.config?.discoveryMode!=='references'&&['html_links','rss','sec_filings'].includes(source.adapter));
+ const active=registry.filter(source=>source.enabled!==false&&source.config?.discoveryMode!=='references'&&['html_links','rss','sec_filings','xml_list'].includes(source.adapter));
  const daily=active.filter(source=>source.cadence==='daily');
  const rotating=active.filter(source=>source.cadence!=='daily');
  if(!rotating.length)return daily;

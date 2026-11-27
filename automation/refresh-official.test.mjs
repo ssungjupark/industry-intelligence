@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {officialUrl,fetchOfficial,discoverHtml,discoverSource,selectSources,stableId,refresh,pdfHeaderMetadata,secFilingDocument,parseOfficial} from './refresh-official.mjs';
+import {officialUrl,fetchOfficial,discoverHtml,discoverSource,discoverXmlList,selectSources,stableId,refresh,pdfHeaderMetadata,secFilingDocument,parseOfficial} from './refresh-official.mjs';
 
 const source={id:'sample-newsroom',entityName:'Sample Inc',issuer:'Sample newsroom',enabled:true,allowedHosts:['example.com'],adapter:'html_links',discoveryUrls:['https://example.com/news'],rules:[{hrefContainsAny:['/press/'],documentType:'other',autoIngest:true}],config:{},maxDocsPerRun:2};
 const index='<html><a href="/press/new-release">New release</a><a href="https://attacker.example.net/press/fake">Fake</a></html>';
@@ -30,6 +30,17 @@ test('a PDF signature on an opaque download URL goes to the PDF parser',async()=
  await assert.rejects(parseOfficial({
   buffer:malformed,contentType:'application/octet-stream',url:new URL('https://example.com/download?id=report'),
  },source),/Invalid PDF|PDF structure/i);
+});
+
+test('official XML list matches columns and builds only numeric HTTPS detail links',()=>{
+ const xmlSource={...source,adapter:'xml_list',config:{xmlList:{root:'articles',idField:'id',titleField:'title',dateField:'posted',documentUrl:'/press/release',documentParam:'seq'}}};
+ const xml='<articles><id>12</id><id>https://outside.invalid</id><title>공식 발표</title><title>Invalid link</title><posted>2026/11/25</posted><posted>2026/11/26</posted></articles>';
+ const rows=discoverXmlList(xmlSource,source.discoveryUrls[0],xml);
+ assert.equal(rows.length,1);
+ assert.equal(rows[0].url,'https://example.com/press/release?seq=12');
+ assert.equal(rows[0].publishedAt,'2026-11-25T00:00:00.000Z');
+ assert.throws(()=>discoverXmlList(xmlSource,source.discoveryUrls[0],xml.replace('<posted>2026/11/26</posted>','')),/columns do not match/);
+ assert.throws(()=>discoverXmlList({...xmlSource,config:{xmlList:{...xmlSource.config.xmlList,documentUrl:'https://outside.invalid/press/'}}},source.discoveryUrls[0],xml),/outside official HTTPS hosts/);
 });
 test('scheduled SEC discovery skips administrative 6-K notices',async()=>{
  const sec={...source,id:'sec-example',entityName:'Example',allowedHosts:['www.sec.gov'],adapter:'sec_filings',discoveryUrls:['https://www.sec.gov/feed'],rules:[{containsAny:['6-K'],documentType:'filing',autoIngest:true}],config:{maxFilingIndexes:2,excludeFilingDescriptions:['TOTAL VOTING RIGHTS']}};

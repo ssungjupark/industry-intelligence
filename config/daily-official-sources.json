@@ -108,47 +108,62 @@
     }
   },
   "lg-energy-solution-korea-ir": {
+    "adapter": "xml_list",
+    "allowedHosts": [
+      "www.lgensol.com"
+    ],
+    "discoveryUrls": [
+      "https://www.lgensol.com/company/company-newsroom/newsroomListAjax.ajax?listSiteCountryCode=KR&listSiteLanguageCode=KO&startRnum=1&endRnum=11&typeGbn=&keyword="
+    ],
     "rules": [
       {
         "hrefContainsAny": [
-          "/company-news/press-releases/"
+          "/kr/company/newsroom-detail?seq="
         ],
         "containsAny": [
-          "financial results",
-          "earnings results"
+          "실적발표",
+          "실적 발표"
         ],
         "documentType": "earnings_release",
         "autoIngest": true
       },
       {
         "hrefContainsAny": [
-          "/company-news/press-releases/"
+          "/kr/company/newsroom-detail?seq="
         ],
         "containsAny": [
-          "energy storage",
-          " battery",
-          "manufacturing",
-          "supply",
-          "BESS",
-          " ESS",
-          "data centers"
+          "ESS",
+          "에너지저장장치",
+          "공급",
+          "배터리",
+          "전력 인프라",
+          "양산",
+          "협약",
+          "투자",
+          "셀 생산"
         ],
         "excludesAny": [
-          "innovation awards",
-          "innovation contest",
-          "ces innovation"
+          "공모전",
+          "봉사",
+          "이벤트",
+          "수상"
         ],
         "documentType": "other",
         "autoIngest": true
       }
     ],
     "config": {
-      "linkSelector": ".entry-list a[href*='/company-news/press-releases/'], a[href*='/company-news/press-releases/']:has(.title):has(.date)",
-      "linkTitleSelector": ".title",
-      "linkDateSelector": ".date",
-      "titleSelector": ".entry-header h1",
-      "contentSelector": ".entry-content",
-      "dateSelector": ".entry-header .date"
+      "xmlList": {
+        "root": "xsync > LMultiData",
+        "idField": "newsroomSeq",
+        "titleField": "title",
+        "dateField": "postFromDate",
+        "documentUrl": "/kr/company/newsroom-detail",
+        "documentParam": "seq"
+      },
+      "titleSelector": ".news-detail-tit",
+      "contentSelector": ".news-detail",
+      "excludeContentSelector": ".news-detail .news-info, .news-detail .news-image-wrapper"
     }
   },
   "kb-financial-group-korea-ir": {
