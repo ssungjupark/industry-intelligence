@@ -12,7 +12,7 @@ export function IndustryBriefing({ industrySlug }: { industrySlug?: string }) {
   return (
     <section className="product-section industry-briefing" aria-labelledby="industry-briefing-title">
       <header>
-        <h2 id="industry-briefing-title">주간 핵심 변화</h2>
+        <h2 id="industry-briefing-title">최근 핵심 변화</h2>
         <p><time dateTime={briefing.from}>{dateLabel(briefing.from)}</time>–<time dateTime={briefing.through}>{dateLabel(briefing.through)}</time> 공식 발표 기준</p>
       </header>
       <ol>
