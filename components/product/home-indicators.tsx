@@ -18,29 +18,23 @@ const signed = (value: number, format = number.format) =>
 type Indicator = (typeof indicators)[number];
 
 const cards: Record<string, {
-  sector: string;
   title: string;
   source: string;
-  description: string;
   format: (row: Indicator) => { value: string; unit: string; period: string; change: string };
 }> = {
   'semiconductor-sales': {
-    sector: '반도체',
     title: '세계 반도체 매출',
     source: 'SIA',
-    description: '전 세계 반도체 매출의 3개월 이동평균',
     format: ({ value, period, change }) => ({
       value: number.format(value * 10),
       unit: '억 달러',
-      period: `${period.slice(0, 4)}년 ${Number(period.slice(5, 7))}월`,
+      period: `${period.slice(0, 4)}년 ${Number(period.slice(5, 7))}월 · 3개월 평균`,
       change: change === null ? '' : `전월 대비 ${signed(change)}%`,
     }),
   },
   'eu-bev-share': {
-    sector: '자동차',
-    title: 'EU 신규 등록 순수 전기차 비중',
+    title: 'EU 신차 중 순수 전기차 비중',
     source: 'ACEA',
-    description: 'EU에서 새로 등록된 승용차 중 순수 전기차의 비율',
     format: ({ value, period, change }) => {
       const month = Number(period.slice(5, 7));
       return {
@@ -52,10 +46,8 @@ const cards: Record<string, {
     },
   },
   'us-crude-stocks': {
-    sector: '에너지',
     title: '미국 상업용 원유 재고',
     source: 'EIA',
-    description: '미국 전략비축유를 제외한 주간 재고',
     format: ({ value, period, change }) => ({
       value: formatBarrels(value),
       unit: '배럴',
@@ -69,7 +61,7 @@ export function HomeIndicators() {
   return (
     <section className="home-indicators" aria-labelledby="home-indicators-title">
       <h2 id="home-indicators-title">산업 주요 지표</h2>
-      <ul className="home-indicator-grid">
+      <ul className="home-indicator-list">
         {indicators.map((row) => {
           const card = cards[row.id];
           const href = sourceLink(row.sourceUrl);
@@ -77,16 +69,17 @@ export function HomeIndicators() {
           const display = card.format(row);
           return (
             <li key={row.id} className="home-indicator">
-              <Link className="home-indicator-main" href={`/industries/${row.industrySlug}#industry-briefing-title`}>
-                <span className="home-indicator-sector">{card.sector} <span aria-hidden="true">↗</span></span>
-                <h3>{card.title}</h3>
+              <h3><Link href={`/industries/${row.industrySlug}#industry-briefing-title`}>{card.title}</Link></h3>
+              <div className="home-indicator-reading">
                 <p className="home-indicator-value">{display.value}<span>{display.unit}</span></p>
-                <p className="home-indicator-context">{display.period}{display.change && <> <span aria-hidden="true">·</span> {display.change}</>}</p>
-                <p className="home-indicator-description">{card.description}</p>
-              </Link>
-              <a className="home-indicator-source" href={href} target="_blank" rel="noopener noreferrer">
-                {card.source} 원문 ↗
-              </a>
+                {display.change && <p className="home-indicator-change">{display.change}</p>}
+              </div>
+              <div className="home-indicator-meta">
+                <time dateTime={row.period}>{display.period}</time>
+                <a className="home-indicator-source" href={href} target="_blank" rel="noopener noreferrer" aria-label={`${card.title} ${card.source} 원문 (새 탭)`}>
+                  {card.source} <span aria-hidden="true">↗</span>
+                </a>
+              </div>
             </li>
           );
         })}

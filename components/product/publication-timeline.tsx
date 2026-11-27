@@ -4,8 +4,8 @@ import type {ProductDocument} from '@/lib/product-selection';
 import {recentPublications,documentTypeLabel,publicationDay} from '@/lib/document-browse';
 import {displayDocumentTitle} from '@/lib/document-relevance';
 
-export function PublicationTimeline({documents,companies,title='주요 공식 발표',archiveHref='#official-documents'}:{documents:ProductDocument[];companies:Company[];title?:string;archiveHref?:string}){
- const rows=recentPublications(documents,companies);
+export function PublicationTimeline({documents,companies,title='주요 공식 발표',archiveHref='#official-documents',limit}:{documents:ProductDocument[];companies:Company[];title?:string;archiveHref?:string;limit?:number}){
+ const rows=recentPublications(documents,companies,limit);
  if(!rows.length)return null;
  const latest=documents.map(d=>d.published_at).filter((value):value is string=>!!value).sort().at(-1);
  return <section className="product-section publication-section"><div className="section-title"><h2>{title}</h2>{latest&&<span className="publication-latest">최신 발표 {publicationDay(latest)}</span>}<Link href={archiveHref}>전체 자료 ↗</Link></div><div className="publication-timeline">{rows.map(d=>{
