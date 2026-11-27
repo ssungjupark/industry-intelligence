@@ -70,5 +70,45 @@
     "summary": "네이버는 2026년 3분기 매출 3조 4,724억 원, 영업이익 4,513억 원을 발표했습니다. 회사는 AI 투자 영향으로 영업이익이 줄었다고 설명했습니다.",
     "significance": "매출이 늘어나는 속도와 AI 투자 비용이 이익에 미치는 영향을 함께 볼 수 있습니다.",
     "sourceUrl": "https://navercorp.com/media/pressReleasesDetail?seq=10034879"
+  },
+  {
+    "companySlug": "posco-holdings",
+    "date": "2026-11-02",
+    "title": "포스코홀딩스 3분기 영업이익 48% 증가",
+    "summary": "포스코홀딩스는 2026년 3분기 연결 매출 19조 1,410억 원과 영업이익 9,450억 원을 발표했습니다. 영업이익은 전년 동기보다 약 48% 늘었습니다.",
+    "significance": "회사 발표에 따르면 리튬 가격 하락과 계절적 생산량 감소로 이차전지소재 부문은 약세였습니다. 부문별 실적을 보면 그룹 이익 개선의 배경을 확인할 수 있습니다.",
+    "sourceUrl": "https://newsroom.posco.com/kr/%ED%8F%AC%EC%8A%A4%EC%BD%94%ED%99%80%EB%94%A9%EC%8A%A4-3%EB%B6%84%EA%B8%B0-%EC%8B%A4%EC%A0%81-%EB%B0%9C%ED%91%9C3%EA%B0%9C-%EB%B6%84%EA%B8%B0-%EC%97%B0%EC%86%8D-%EC%8B%A4%EC%A0%81-%EA%B0%9C/"
+  },
+  {
+    "companySlug": "lg-energy-solution",
+    "date": "2026-11-03",
+    "title": "LG에너지솔루션 3분기 매출 9조 6,000억 원",
+    "summary": "LG에너지솔루션은 2026년 3분기 연결 매출 약 9조 6,000억 원과 영업이익 7,560억 원을 발표했습니다. 매출은 전분기보다 27.6% 늘었습니다.",
+    "significance": "회사는 ESS 출하 확대와 전기차 배터리 출하 증가를 매출 성장 요인으로 꼽았습니다. 발표에는 북미 생산 인센티브도 함께 명시돼 있습니다.",
+    "sourceUrl": "https://news.lgensol.com/company-news/press-releases/5549/"
+  },
+  {
+    "companySlug": "kb-financial-group",
+    "date": "2026-10-29",
+    "title": "KB금융 3분기 순수수료이익 1조 1,266억 원",
+    "summary": "KB금융은 2026년 3분기 경영실적을 공개했습니다. 3분기 그룹 순수수료이익은 1조 1,266억 원이었습니다.",
+    "significance": "이자이익과 수수료이익을 나눠 보면 은행 중심 금융그룹의 수익원이 어떻게 달라지고 있는지 볼 수 있습니다.",
+    "sourceUrl": "https://www.kbfg.com/common/jsp/fileDownUtil.jsp?filepath=/data/ir_presentation/2026_3QPT_KOR.pdf"
+  },
+  {
+    "companySlug": "amorepacific-holdings",
+    "date": "2026-10-29",
+    "title": "아모레퍼시픽홀딩스 3분기 영업이익 24.7% 증가",
+    "summary": "아모레퍼시픽홀딩스는 2026년 3분기 연결 매출 1조 2,073억 원과 영업이익 1,301억 원을 기록했습니다. 전년 동기 대비 매출은 8.9%, 영업이익은 24.7% 늘었습니다.",
+    "significance": "회사는 국내 수익성 개선과 해외의 여러 브랜드 성장을 발표에서 설명했습니다. 원문에는 주력 계열사와 기타 계열사의 실적이 따로 나옵니다.",
+    "sourceUrl": "https://www.apgroup.com/int/ko/news/2026-10-29-3.html"
+  },
+  {
+    "companySlug": "kakao",
+    "date": "2026-11-05",
+    "title": "카카오 3분기 플랫폼 매출 17% 증가",
+    "summary": "카카오는 2026년 3분기 연결 매출 2조 867억 원과 영업이익 2,403억 원을 발표했습니다. 플랫폼 부문 매출은 전년 동기 대비 17%, 톡비즈 매출은 13% 늘었습니다.",
+    "significance": "카카오톡 기반 광고·구독·커머스가 어떻게 성장했는지 사업별로 확인할 수 있습니다.",
+    "sourceUrl": "https://www.kakaocorp.com/page/detail/12190"
   }
 ]

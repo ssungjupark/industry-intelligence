@@ -24,6 +24,13 @@ test('SEC exhibits use direct Archives URLs and reject interactive challenge bod
  assert.equal(secFilingDocument(index,html).url,'https://www.sec.gov/Archives/edgar/data/123/456/report.htm');
  await assert.rejects(parseOfficial({buffer:Buffer.from('<script src="/WYyeob_abc"></script>'+('x'.repeat(300))),contentType:'text/plain',url:new URL('https://www.sec.gov/Archives/edgar/data/123/456/report.htm')},source),/challenge/);
 });
+
+test('a PDF signature on an opaque download URL goes to the PDF parser',async()=>{
+ const malformed=Buffer.from('%PDF-1.7\n'+ 'unparseable bytes '.repeat(20));
+ await assert.rejects(parseOfficial({
+  buffer:malformed,contentType:'application/octet-stream',url:new URL('https://example.com/download?id=report'),
+ },source),/Invalid PDF|PDF structure/i);
+});
 test('scheduled SEC discovery skips administrative 6-K notices',async()=>{
  const sec={...source,id:'sec-example',entityName:'Example',allowedHosts:['www.sec.gov'],adapter:'sec_filings',discoveryUrls:['https://www.sec.gov/feed'],rules:[{containsAny:['6-K'],documentType:'filing',autoIngest:true}],config:{maxFilingIndexes:2,excludeFilingDescriptions:['TOTAL VOTING RIGHTS']}};
  const feed='<feed><entry><title>6-K - Report</title><link href="https://www.sec.gov/admin-index.htm"/><filing-date>2026-11-02</filing-date></entry><entry><title>6-K - Report</title><link href="https://www.sec.gov/results-index.htm"/><filing-date>2026-10-30</filing-date></entry></feed>';
@@ -51,9 +58,9 @@ test('daily sources keep their place every day without displacing rotating sourc
 
 test('official lists preserve the article title and Korean publication date',()=>{
  const configured={...source,config:{linkSelector:'a.item',linkContainer:'li',linkTitleSelector:'a.item',linkDateSelector:'.date'}};
- const html='<a href="/press/navigation">Navigation</a><li><a href="/press/1" class="item">공식 발표</a><span class="date">2026.11.3.</span></li><li><a href="/press/2" class="item">정기 공시</a><span class="date">2026년 11월 4일</span></li><li><a href="/press/3" class="item">오류 날짜</a><span class="date">2026.02.30</span></li>';
+ const html='<a href="/press/navigation">Navigation</a><li><a href="/press/1" class="item">공식 발표</a><span class="date">2026.11.3.</span></li><li><a href="/press/2" class="item">정기 공시</a><span class="date">2026년 11월 4일</span></li><li><a href="/press/3" class="item">오류 날짜</a><span class="date">2026.02.30</span></li><li><a href="/press/4" class="item">기업 발표</a><span class="date">2026/11/05</span></li>';
  assert.deepEqual(discoverHtml(configured,source.discoveryUrls[0],html).map(({title,publishedAt})=>[title,publishedAt]),[
-  ['공식 발표','2026-11-03T00:00:00.000Z'],['정기 공시','2026-11-04T00:00:00.000Z'],['오류 날짜',null],
+  ['공식 발표','2026-11-03T00:00:00.000Z'],['정기 공시','2026-11-04T00:00:00.000Z'],['오류 날짜',null],['기업 발표','2026-11-05T00:00:00.000Z'],
  ]);
 });
 

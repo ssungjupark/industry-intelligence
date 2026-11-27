@@ -81,5 +81,148 @@
       "titleSelector": ".media-press-detail__title",
       "dateSelector": ".board-view-header .date"
     }
+  },
+  "posco-holdings-korea-ir": {
+    "adapter": "rss",
+    "rules": [
+      {
+        "hrefContainsAny": [
+          "/kr/"
+        ],
+        "containsAny": [
+          "포스코홀딩스"
+        ],
+        "excludesAny": [
+          "임직원 인터뷰",
+          "기자단",
+          "이벤트"
+        ],
+        "documentType": "other",
+        "autoIngest": true
+      }
+    ],
+    "config": {
+      "titleSelector": "h1.post_title",
+      "contentSelector": ".post_content_wrap",
+      "dateSelector": "article.post_detail .meta .date"
+    }
+  },
+  "lg-energy-solution-korea-ir": {
+    "rules": [
+      {
+        "hrefContainsAny": [
+          "/company-news/press-releases/"
+        ],
+        "containsAny": [
+          "financial results",
+          "earnings results"
+        ],
+        "documentType": "earnings_release",
+        "autoIngest": true
+      },
+      {
+        "hrefContainsAny": [
+          "/company-news/press-releases/"
+        ],
+        "containsAny": [
+          "energy storage",
+          " battery",
+          "manufacturing",
+          "supply",
+          "BESS",
+          " ESS",
+          "data centers"
+        ],
+        "excludesAny": [
+          "innovation awards",
+          "innovation contest",
+          "ces innovation"
+        ],
+        "documentType": "other",
+        "autoIngest": true
+      }
+    ],
+    "config": {
+      "linkSelector": ".entry-list a[href*='/company-news/press-releases/'], a[href*='/company-news/press-releases/']:has(.title):has(.date)",
+      "linkTitleSelector": ".title",
+      "linkDateSelector": ".date",
+      "titleSelector": ".entry-header h1",
+      "contentSelector": ".entry-content",
+      "dateSelector": ".entry-header .date"
+    }
+  },
+  "kb-financial-group-korea-ir": {
+    "maxDocsPerRun": 1,
+    "rules": [
+      {
+        "hrefContainsAny": [
+          "filepath=/data/ir_presentation/"
+        ],
+        "documentType": "presentation",
+        "autoIngest": true
+      }
+    ],
+    "config": {
+      "linkSelector": "ul.table-body a.btn-down[href*='filepath=/data/ir_presentation/'][href$='_KOR.pdf']",
+      "linkContainer": "li",
+      "linkTitleSelector": ".col:nth-child(2)",
+      "maxCandidates": 3
+    }
+  },
+  "amorepacific-holdings-korea-ir": {
+    "maxDocsPerRun": 1,
+    "rules": [
+      {
+        "hrefContainsAny": [
+          "/int/ko/news/"
+        ],
+        "containsAny": [
+          "아모레퍼시픽 그룹",
+          "아모레퍼시픽홀딩스"
+        ],
+        "excludesAny": [
+          "경진대회",
+          "미술관",
+          "공모",
+          "대금 조기",
+          "창립"
+        ],
+        "documentType": "other",
+        "autoIngest": true
+      }
+    ],
+    "config": {
+      "linkSelector": ".news-list .thumb > a[href^='/int/ko/news/']",
+      "linkTitleSelector": ".thumb-desc h3",
+      "linkDateSelector": ".thumb-desc .date",
+      "titleSelector": ".detail-head h2",
+      "contentSelector": "article.detail-contents",
+      "dateSelector": ".detail-head .basic > span.label:last-child"
+    }
+  },
+  "kakao-korea-ir": {
+    "discoveryUrls": [
+      "https://www.kakaocorp.com/ir/referenceRoom/earningsAnnouncement"
+    ],
+    "allowedHosts": [
+      "www.kakaocorp.com",
+      "t1.kakaocdn.net"
+    ],
+    "maxDocsPerRun": 1,
+    "rules": [
+      {
+        "hrefContainsAny": [
+          "/ir/results-announcement/"
+        ],
+        "documentType": "presentation",
+        "autoIngest": true
+      }
+    ],
+    "config": {
+      "linkSelector": "tbody tr .cell_earnings a.btn_download[href$=\".pdf\"]:first-of-type",
+      "linkContainer": "tr",
+      "linkTitleSelector": "td:first-child, th:first-child",
+      "maxCandidates": 1
+    }
   }
 }

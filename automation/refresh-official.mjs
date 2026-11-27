@@ -49,7 +49,7 @@ async function fetchSecOfficial(value,source,fetcher){
 function publicationDate(value){
  if(!value||!/(?:19|20)\d{2}/.test(value))return null;
  const text=clean(value).replace(/\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\./gi,'$1');
- const local=text.match(/^(\d{4})\s*[.년]\s*(\d{1,2})\s*[.월]\s*(\d{1,2})\s*[.일]?$/);
+ const local=text.match(/^(\d{4})\s*[./년]\s*(\d{1,2})\s*[./월]\s*(\d{1,2})\s*[.일]?$/);
  if(local)return publicationDate(`${local[1]}-${local[2].padStart(2,'0')}-${local[3].padStart(2,'0')}`);
  const monthFirst=text.match(/^(?:[A-Za-z]+,\s*)?([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})$/);
  const dayFirst=text.match(/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/);
@@ -185,7 +185,7 @@ function secHeadline(reading,entityName,fallback){
  return fallback;
 }
 export async function parseOfficial(fetched,source,title){
- if(fetched.contentType.includes('pdf')||fetched.url.pathname.toLowerCase().endsWith('.pdf')){
+ if(fetched.contentType.includes('pdf')||fetched.url.pathname.toLowerCase().endsWith('.pdf')||fetched.buffer.toString('ascii',0,5)==='%PDF-'){
   const pdf=await getDocumentProxy(new Uint8Array(fetched.buffer));
   if(pdf.numPages>MAX_PAGES)throw Error(`PDF exceeds ${MAX_PAGES} pages`);
   const extracted=await extractText(pdf,{mergePages:false});const pages=Array.isArray(extracted.text)?extracted.text:[extracted.text];
@@ -249,7 +249,7 @@ async function mergeCoverage(path,stem,tables,reading){
 }
 // Percent escape case varies across WordPress index pages and RSS feeds.
 const documentKey=url=>url.replace(/%[a-f0-9]{2}/gi,part=>part.toUpperCase());
-export async function refresh({directory=process.cwd(),date=new Date(),batch=12,maxNew=12,dailyMaxNew=12,group='all',fetcher=fetch,dryRun=false}={}){
+export async function refresh({directory=process.cwd(),date=new Date(),batch=12,maxNew=12,dailyMaxNew=20,group='all',fetcher=fetch,dryRun=false}={}){
  const path=name=>`${directory}/${name}`;
  const [catalog,reading,registry]=await Promise.all(['data/official-catalog.json','data/reading-content.json','automation/source-registry.json'].map(async name=>JSON.parse(await readFile(path(name),'utf8'))));
  const tables=catalog.tables;if(!Array.isArray(tables?.documents)||!Array.isArray(tables?.entities)||!Array.isArray(tables?.source_registry))throw Error('Invalid public catalog');
@@ -287,7 +287,8 @@ export async function refresh({directory=process.cwd(),date=new Date(),batch=12,
   let perSource=0;
   const lane=source.cadence==='daily'?'daily':'rotating';
   // Only the newest visible items; do not slowly backfill a source's entire archive.
-  for(const candidate of found.slice(0,8)){
+  const candidates=Math.min(8,Math.max(1,Number(source.config?.maxCandidates)||8));
+  for(const candidate of found.slice(0,candidates)){
    if(attempts[lane]>=budgets[lane]||perSource>=Math.min(2,source.maxDocsPerRun||2))break;
    const now=date.toISOString(),company=companies.get(source.entityName);
    const key=documentKey(candidate.url);
